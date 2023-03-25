@@ -1,3 +1,4 @@
+import openai
 import enum
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -38,3 +39,19 @@ class Work(db.Model):
 
     def __repr__(self):
         return f'<Work {self.title} ({self.genre})>'
+    
+    def generate_prompt(self):
+        if self.genre != Genre.default:
+            genre_str = f'{self.genre}'[6:]
+            return f"In no more than 8000 characters, write a piece of {genre_str} that responds to the following prompt: '{self.title}'"
+        else:
+            return f"In no more than 8000 characters, write a creative piece that responds to the following prompt: '{self.title}'"
+        
+    def generate_completion(self):
+        response = openai.Completion.create(
+            model='text-davinci-003',
+            prompt=self.generate_prompt(),
+            temperature=0.6,
+            max_tokens=2048
+        )
+        self.body = response.choices[0].text
