@@ -6,6 +6,16 @@ from datetime import datetime
 from sqlalchemy import Enum
 from werkzeug.security import check_password_hash, generate_password_hash
 
+followers = db.Table('follower',
+    db.Column('follower_id', db.Integer, db.ForeignKey('prompter.id'), primary_key=True),
+    db.Column('followed_id', db.Integer, db.ForeignKey('prompter.id'), primary_key=True)
+)
+
+likers = db.Table('liker',
+    db.Column('liker_id', db.ForeignKey('prompter.id'), primary_key=True),
+    db.Column('liked_id', db.ForeignKey('work.id'), primary_key=True)
+)
+
 class Genre(enum.Enum):
     default = 0
     fiction = 1
@@ -20,6 +30,12 @@ class Prompter(db.Model):
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     works = db.relationship('Work', backref='prompter', lazy='dynamic')
+    followed = db.relationship(
+        'Prompter', secondary=followers,
+        primaryjoin=(followers.c.follower_id==id),
+        secondaryjoin=(followers.c.followed_id==id),
+        backref=db.backref('followers',lazy='dynamic'), lazy='dynamic')
+    liked = db.relationship('Work', secondary=likers, back_populates='likers')
 
     def __repr__(self):
         return f'<Prompter {self.username}>'
@@ -30,6 +46,34 @@ class Prompter(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
+    def follow(self, prompter):
+        if not self.is_following(prompter):
+            self.followed.append(prompter)
+
+    def unfollow(self, prompter):
+        if self.is_following(prompter):
+            self.followed.remove(prompter)
+    
+    def is_following(self, prompter):
+        return self.followed.filter(followers.c.followed_id == prompter.id).count() > 0
+    
+    def like(self, work):
+        if not self.is_liking(work):
+            self.liked.append(work)
+    
+    def unlike(self, work):
+        if self.is_liking(work):
+            self.liked.remove(work)
+    
+    def is_liking(self, work):
+        return work in self.liked
+    
+    def followed_works(self):
+        return db.session.query(Work).join(
+            followers, (followers.c.followed_id == Work.prompter_id)).filter(
+                followers.c.follower_id == self.id).order_by(
+                    Work.timestamp.desc())
+    
 class Work(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     genre = db.Column(Enum(Genre))
@@ -37,6 +81,7 @@ class Work(db.Model):
     body = db.Column(db.String(8000))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     prompter_id = db.Column(db.Integer, db.ForeignKey('prompter.id'))
+    likers = db.relationship(Prompter, secondary=likers, back_populates='liked')
 
     def __repr__(self):
         return f'<Work {self.title} ({self.genre})>'
