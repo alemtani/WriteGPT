@@ -1,15 +1,19 @@
 import os
 import unittest
 
-from app import app, db
+from app import create_app, db
 from app.models import Genre, Prompter, Work
+from config import Config
 from datetime import datetime, timedelta
 
-os.environ['DATABASE_URL'] = 'sqlite://'
+class TestConfig(Config):
+    Testing = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
 
 class PrompterModelCase(unittest.TestCase):
     def setUp(self):
-        self.app_context = app.app_context()
+        self.app = create_app(TestConfig)
+        self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
 
