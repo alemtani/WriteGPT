@@ -20,6 +20,9 @@ def create_app(config_class=Config):
 
     openai.api_key = app.config['OPENAI_API_KEY']
 
+    from app.api import bp as api_bp
+    app.register_blueprint(api_bp, url_prefix='/api')
+
     if not app.debug and not app.testing:
         if not os.path.exists('logs'):
             os.mkdir('logs')
