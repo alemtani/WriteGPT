@@ -19,3 +19,7 @@ def update_work(id):
 @bp.route('/works/<int:id>', methods=['DELETE'])
 def delete_work(id):
     pass
+
+@bp.route('/works/<int:id>/likers', method=['GET'])
+def get_likers(id):
+    pass
