@@ -16,10 +16,6 @@ def get_prompter(id):
 def update_prompter(id):
     pass
 
-@bp.route('/prompters/<int:id>/works', methods=['GET'])
-def get_works(id):
-    pass
-
 @bp.route('/prompters/<int:id>/followers', methods=['GET'])
 def get_followers(id):
     pass

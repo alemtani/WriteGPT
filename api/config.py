@@ -12,7 +12,16 @@ class Config(object):
     # API Keys
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
-    # Database Config
+    # Database
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql://postgres:postgres@localhost/writegpt'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Email
+    MAIL_SERVER = os.environ.get('MAIL_SERVER')
+    MAIL_PORT = int(os.environ.get('MAIL_PORT') or 25)
+    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
+    ADMINS = ['alex.m.tanimoto@gmail.com']

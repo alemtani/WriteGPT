@@ -1,10 +1,10 @@
 from app.api import bp
 
-@bp.route('/works', method=['GET'])
+@bp.route('/works', methods=['GET'])
 def get_works():
     pass
 
-@bp.route('/works', method=['POST'])
+@bp.route('/works', methods=['POST'])
 def create_work():
     pass
 
@@ -20,6 +20,10 @@ def update_work(id):
 def delete_work(id):
     pass
 
-@bp.route('/works/<int:id>/likers', method=['GET'])
+@bp.route('/prompters/<int:id>/works', methods=['GET'])
+def get_prompter_works(id):
+    pass
+
+@bp.route('/works/<int:id>/likers', methods=['GET'])
 def get_likers(id):
     pass

@@ -27,10 +27,16 @@ class PrompterModelCase(unittest.TestCase):
         p.set_password('cat')
         self.assertFalse(p.check_password('dog'))
         self.assertTrue(p.check_password('cat'))
+    
+    def test_avatar(self):
+        p = Prompter(username='john', email='john@example.com')
+        self.assertEqual(p.avatar(128), ('https://www.gravatar.com/avatar/'
+                                         'd4c74594d841139328695756648b6bd6'
+                                         '?d=identicon&s=128'))
 
     def test_follow(self):
-        p1 = Prompter(username='john')
-        p2 = Prompter(username='susan')
+        p1 = Prompter(username='john', email='john@example.com')
+        p2 = Prompter(username='susan', email='susan@example.com')
         db.session.add(p1)
         db.session.add(p2)
         db.session.commit()
@@ -52,7 +58,7 @@ class PrompterModelCase(unittest.TestCase):
         self.assertEqual(p2.followers.count(), 0)
     
     def test_like(self):
-        p = Prompter(username='susan')
+        p = Prompter(username='susan', email='susan@example.com')
         w = Work(genre=Genre.default, title='test', prompter=p)
         db.session.add(p)
         db.session.add(w)
@@ -76,10 +82,10 @@ class PrompterModelCase(unittest.TestCase):
 
     def test_follow_works(self):
         # create four prompters
-        p1 = Prompter(username='john')
-        p2 = Prompter(username='susan')
-        p3 = Prompter(username='mary')
-        p4 = Prompter(username='david')
+        p1 = Prompter(username='john', email='john@example.com')
+        p2 = Prompter(username='susan', email='susan@example.com')
+        p3 = Prompter(username='mary', email='mary@example.com')
+        p4 = Prompter(username='david', email='david@example.com')
         db.session.add_all([p1, p2, p3, p4])
 
         # create four pieces
