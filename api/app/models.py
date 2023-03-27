@@ -1,10 +1,12 @@
+import base64
 import enum
 import jwt
 import openai
+import os
 
 from app import db
-from datetime import datetime
-from flask import current_app
+from datetime import datetime, timedelta
+from flask import current_app, url_for
 from hashlib import md5
 from sqlalchemy import Enum
 from time import time
@@ -20,6 +22,28 @@ likers = db.Table('liker',
     db.Column('liked_id', db.ForeignKey('work.id'), primary_key=True)
 )
 
+class PaginatedAPIMixin(object):
+    @staticmethod
+    def to_collection_dict(query, page, per_page, endpoint, **kwargs):
+        resources = query.paginate(page=page, per_page=per_page, error_out=False)
+        data = {
+            'items': [item.to_dict() for item in resources.items],
+            '_meta': {
+                'page': page,
+                'per_page': per_page,
+                'total_pages': resources.pages,
+                'total_items': resources.total
+            },
+            '_links': {
+                'self': url_for(endpoint, page=page, per_page=per_page, **kwargs),
+                'next': url_for(endpoint, page=page+1, per_page=per_page, 
+                                **kwargs) if resources.has_next else None,
+                'prev': url_for(endpoint, page=page-1, per_page=per_page, 
+                                **kwargs) if resources.has_prev else None,
+            }
+        }
+        return data
+
 class Genre(enum.Enum):
     default = 0
     fiction = 1
@@ -27,20 +51,22 @@ class Genre(enum.Enum):
     poetry = 3
     drama = 4
 
-class Prompter(db.Model):
+class Prompter(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    token = db.Column(db.String(32), index=True, unique=True)
+    token_expiration = db.Column(db.DateTime)
     works = db.relationship('Work', backref='prompter', lazy='dynamic')
     followed = db.relationship(
         'Prompter', secondary=followers,
         primaryjoin=(followers.c.follower_id==id),
         secondaryjoin=(followers.c.followed_id==id),
         backref=db.backref('followers',lazy='dynamic'), lazy='dynamic')
-    liked = db.relationship('Work', secondary=likers, back_populates='likers')
+    liked = db.relationship('Work', secondary=likers, back_populates='likers', lazy='dynamic')
 
     def __repr__(self):
         return f'<Prompter {self.username}>'
@@ -75,7 +101,7 @@ class Prompter(db.Model):
             self.liked.remove(work)
     
     def is_liking(self, work):
-        return work in self.liked
+        return self.liked.filter(likers.c.liked_id == work.id).count() > 0
     
     def followed_works(self):
         return db.session.query(Work).join(
@@ -97,22 +123,74 @@ class Prompter(db.Model):
             return
         return db.session.query(Prompter).get(id)
     
-class Work(db.Model):
+    def to_dict(self, include_email=False):
+        data = {
+            'id': self.id,
+            'username': self.username,
+            'last_seen': self.last_seen.isoformat() + 'Z',
+            'about_me': self.about_me,
+            'work_count': self.works.count(),
+            'follower_count': self.followers.count(),
+            'followed_count': self.followed.count(),
+            'liked_count': self.liked.count(),
+            '_links': {
+                'self': url_for('prompters.get_prompter', id=self.id),
+                'works': url_for('prompters.get_works', id=self.id),
+                'followers': url_for('prompters.get_followers', id=self.id),
+                'followed': url_for('prompters.get_followed', id=self.id),
+                'liked': url_for('prompters.get_liked', id=self.id),
+                'feed': url_for('prompters.get_feed', id=self.id),
+                'avatar': self.avatar(128)
+            }
+        }
+        if include_email:
+            data['email'] = self.email
+        return data
+    
+    def from_dict(self, data, new_prompter=False):
+        for field in ['username', 'email', 'about_me']:
+            if field in data:
+                setattr(self, field, data[field])
+        if new_prompter and 'password' in data:
+            self.set_password(data['password'])
+    
+    def get_token(self, expires_in=3600):
+        now = datetime.utcnow()
+        if self.token and self.token_expiration > now + timedelta(seconds=60):
+            return self.token
+        self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
+        self.token_expiration = now + timedelta(seconds=expires_in)
+        db.session.add(self)
+        return self.token
+    
+    def revoke_token(self):
+        self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
+    
+    @staticmethod
+    def check_token(token):
+        prompter = db.session.query(Prompter).filter_by(token=token).first()
+        if prompter is None or prompter.token_expiration < datetime.utcnow():
+            return None
+        return prompter
+
+class Work(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     genre = db.Column(Enum(Genre))
     title = db.Column(db.String(140))
     body = db.Column(db.String(8000))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     prompter_id = db.Column(db.Integer, db.ForeignKey('prompter.id'))
-    likers = db.relationship(Prompter, secondary=likers, back_populates='liked')
+    likers = db.relationship(Prompter, secondary=likers, back_populates='liked', lazy='dynamic')
 
     def __repr__(self):
         return f'<Work {self.title} ({self.genre})>'
     
+    def get_genre(self):
+        return f'{self.genre}'[6:]
+    
     def generate_prompt(self):
         if self.genre != Genre.default:
-            genre_str = f'{self.genre}'[6:]
-            return f"In no more than 8000 characters, write a piece of {genre_str} that responds to the following prompt: '{self.title}'"
+            return f"In no more than 8000 characters, write a piece of {self.get_genre()} that responds to the following prompt: '{self.title}'"
         else:
             return f"In no more than 8000 characters, write a creative piece that responds to the following prompt: '{self.title}'"
         
@@ -124,3 +202,37 @@ class Work(db.Model):
             max_tokens=2048
         )
         self.body = response.choices[0].text
+    
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'genre': self.get_genre(),
+            'title': self.title,
+            'body': self.body,
+            'timestamp': self.timestamp,
+            'prompter_id': self.prompter_id,
+            'likers_count': self.likers.count(),
+            '_links': {
+                'self': url_for('works.get_work', id=self.id),
+                'likers': url_for('works.get_likers', id=self.id)
+            }
+        }
+        return data
+    
+    def from_dict(self, data, new_work=False):
+        for field in ['title', 'prompter_id']:
+            if field in data:
+                setattr(self, field, data[field])
+        if 'genre' in data:
+            if data['genre'] == 'fiction':
+                self.genre = Genre.fiction
+            elif data['genre'] == 'nonfiction':
+                self.genre = Genre.nonfiction
+            elif data['genre'] == 'poetry':
+                self.genre = Genre.poetry
+            elif data['genre'] == 'drama':
+                self.genre = Genre.drama
+            else:
+                self.genre = Genre.default
+        if new_work:
+            self.generate_completion()

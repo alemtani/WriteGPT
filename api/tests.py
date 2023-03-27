@@ -63,22 +63,22 @@ class PrompterModelCase(unittest.TestCase):
         db.session.add(p)
         db.session.add(w)
         db.session.commit()
-        self.assertEqual(p.liked, [])
-        self.assertEqual(w.likers, [])
+        self.assertEqual(p.liked.all(), [])
+        self.assertEqual(w.likers.all(), [])
 
         p.like(w)
         db.session.commit()
         self.assertTrue(p.is_liking(w))
-        self.assertEqual(len(p.liked), 1)
-        self.assertEqual(p.liked[0].title, 'test')
-        self.assertEqual(len(w.likers), 1)
-        self.assertEqual(w.likers[0].username, 'susan')
+        self.assertEqual(p.liked.count(), 1)
+        self.assertEqual(p.liked.first().title, 'test')
+        self.assertEqual(w.likers.count(), 1)
+        self.assertEqual(w.likers.first().username, 'susan')
 
         p.unlike(w)
         db.session.commit()
         self.assertFalse(p.is_liking(w))
-        self.assertEqual(len(p.liked), 0)
-        self.assertEqual(len(w.likers), 0)
+        self.assertEqual(p.liked.count(), 0)
+        self.assertEqual(w.likers.count(), 0)
 
     def test_follow_works(self):
         # create four prompters

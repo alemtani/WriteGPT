@@ -23,8 +23,14 @@ def create_app(config_class=Config):
 
     openai.api_key = app.config['OPENAI_API_KEY']
 
-    from app.api import bp as api_bp
-    app.register_blueprint(api_bp, url_prefix='/api')
+    from app.errors import errors
+    app.register_blueprint(errors)
+    from app.prompters import prompters
+    app.register_blueprint(prompters, url_prefix='/api')
+    from app.tokens import tokens
+    app.register_blueprint(tokens, url_prefix='/api')
+    from app.works import works
+    app.register_blueprint(works, url_prefix='/api')
 
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:
