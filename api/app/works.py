@@ -11,7 +11,7 @@ works = Blueprint('works', __name__)
 @token_auth.login_required
 @paginated_response(model_class=Work, endpoint='works.get_works')
 def get_works():
-    return db.session.query(Work)
+    return db.session.query(Work), None
 
 @works.route('/works', methods=['POST'])
 @token_auth.login_required
@@ -27,17 +27,18 @@ def create_work():
     response = jsonify(work.to_dict())
     response.status_code = 201
     response.headers['Location'] = url_for('works.get_work', id=work.id)
-    return prompter
+    return response
 
 @works.route('/works/<int:id>', methods=['GET'])
 @token_auth.login_required
 def get_work(id):
-    return jsonify(db.session.query(Work).get_or_404(id).to_dict())
+    work = db.session.get(Work, id) or abort(404)
+    return jsonify(work.to_dict())
 
 @works.route('/works/<int:id>', methods=['PUT'])
 @token_auth.login_required
 def update_work(id):
-    work = db.session.query(Work).get_or_404(id)
+    work = db.session.get(Work, id) or abort(404)
     if work.prompter != token_auth.current_user():
         abort(403)
     data = request.get_json() or {}
@@ -51,7 +52,7 @@ def update_work(id):
 @works.route('/works/<int:id>', methods=['DELETE'])
 @token_auth.login_required
 def delete_work(id):
-    work = db.session.query(Work).get_or_404(id)
+    work = db.session.get(Work, id) or abort(404)
     if work.prompter != token_auth.current_user():
         abort(403)
     db.session.delete(work)
@@ -62,5 +63,5 @@ def delete_work(id):
 @token_auth.login_required
 @paginated_response(model_class=Prompter, endpoint='works.get_likers')
 def get_likers(id):
-    work = db.session.query(Work).get_or_404(id)
-    return work.likers
+    work = db.session.get(Work, id) or abort(404)
+    return work.likers, id

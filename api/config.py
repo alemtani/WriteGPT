@@ -26,4 +26,4 @@ class Config(object):
     ADMINS = ['alex.m.tanimoto@gmail.com']
 
     # Client
-    CLIENT_URL = os.environ.get('CLIENT_URL')
+    CLIENT_NAME = os.environ.get('CLIENT_NAME')

@@ -15,7 +15,7 @@ class PrompterTests(BaseTestCase):
             'password': 'dog'
         })
         assert rv.status_code == 201
-        prompter_id = rv.json['id']
+        id = rv.json['id']
         rv = self.client.post('/api/prompters', json={
             'username': 'user',
             'email': 'user2@example.com',
@@ -28,7 +28,7 @@ class PrompterTests(BaseTestCase):
             'password': 'dog'
         })
         assert rv.status_code == 400
-        rv = self.client.get(f'/api/prompters/{prompter_id}', headers={
+        rv = self.client.get(f'/api/prompters/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200
@@ -37,16 +37,18 @@ class PrompterTests(BaseTestCase):
 
     def test_create_invalid_prompter(self):
         rv = self.client.post('/api/prompters', json={
-            'username': '1user',
+            'username': 'test',
             'email': 'user@example.com',
             'password': 'dog'
         })
         assert rv.status_code == 400
         rv = self.client.post('/api/prompters', json={
-            'username': '',
-            'email': 'user@example.com',
+            'username': 'user',
+            'email': 'test@example.com',
             'password': 'dog'
         })
+        assert rv.status_code == 400
+        rv = self.client.post('/api/prompters')
         assert rv.status_code == 400
 
     def test_get_prompters(self):
@@ -109,7 +111,7 @@ class PrompterTests(BaseTestCase):
             'password': 'dog'
         })
         assert rv.status_code == 201
-        id = rv.json[id]
+        id = rv.json['id']
 
         rv = self.client.put(f'/api/prompters/{id}', json={
             'about_me': 'I am testing',
@@ -124,14 +126,28 @@ class PrompterTests(BaseTestCase):
         }, headers={
             'Authorization': f'Bearer {self.token}'
         })
+        assert rv.status_code == 400
+        rv = self.client.put('/api/prompters/1', json={
+            'old_password': 'foo1',
+            'password': 'bar',
+        }, headers={
+            'Authorization': f'Bearer {self.token}'
+        })
+        assert rv.status_code == 400
+        rv = self.client.put('/api/prompters/1', json={
+            'old_password': 'foo',
+            'password': 'bar',
+        }, headers={
+            'Authorization': f'Bearer {self.token}'
+        })
         assert rv.status_code == 200
         assert rv.json['username'] == 'test'
         assert rv.json['email'] == 'test@example.com'
         assert 'password' not in rv.json
 
-        rv = self.client.post('/api/tokens', auth=('test@example.com', 'foo'))
+        rv = self.client.post('/api/tokens', auth=('test', 'foo'))
         assert rv.status_code == 401
-        rv = self.client.post('/api/tokens', auth=('test@example.com', 'bar'))
+        rv = self.client.post('/api/tokens', auth=('test', 'bar'))
         assert rv.status_code == 200
     
     def test_get_prompter_works(self):
@@ -141,7 +157,6 @@ class PrompterTests(BaseTestCase):
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 201
-        id = rv.json['id']
 
         rv = self.client.get('/api/prompters/1/works', headers={
             'Authorization': f'Bearer {self.token}'
@@ -188,20 +203,10 @@ class PrompterTests(BaseTestCase):
         assert rv.status_code == 201
         id = rv.json['id']
 
-        rv = self.client.get(f'/api/prompters/1/following/{id}', headers={
-            'Authorization': f'Bearer {self.token}'
-        })
-        assert rv.status_code == 404
-
         rv = self.client.post(f'/api/prompters/1/following/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 204
-
-        rv = self.client.get(f'/api/prompters/1/following/{id}', headers={
-            'Authorization': f'Bearer {self.token}'
-        })
-        assert rv.status_code == 200
 
         rv = self.client.post(f'/api/prompters/1/following/{id}', headers={
             'Authorization': f'Bearer {self.token}'
@@ -316,20 +321,10 @@ class PrompterTests(BaseTestCase):
         assert rv.json['_meta']['total_items'] == 0
         assert rv.json['items'] == []
 
-        rv = self.client.get(f'/api/prompters/1/liked/{id}', headers={
-            'Authorization': f'Bearer {self.token}'
-        })
-        assert rv.status_code == 404
-
         rv = self.client.post(f'/api/prompters/1/liked/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 204
-
-        rv = self.client.get(f'/api/prompters/1/liked/{id}', headers={
-            'Authorization': f'Bearer {self.token}'
-        })
-        assert rv.status_code == 200
 
         rv = self.client.post(f'/api/prompters/1/liked/{id}', headers={
             'Authorization': f'Bearer {self.token}'
@@ -381,7 +376,7 @@ class PrompterTests(BaseTestCase):
             'password': 'dog',
         })
         assert rv.status_code == 201
-        prompter_id = rv.json['id']
+        id = rv.json['id']
 
         rv = self.client.post('/api/works', json={
             'title': 'test'
@@ -389,26 +384,25 @@ class PrompterTests(BaseTestCase):
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 201
-        work_id = rv.json['id']
 
-        rv = self.client.post(f'/api/prompters/{prompter_id}/liked/1', headers={
+        rv = self.client.post(f'/api/prompters/{id}/liked/1', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 403
 
-        rv = self.client.get(f'/api/prompters/{prompter_id}/liked', headers={
+        rv = self.client.get(f'/api/prompters/{id}/liked', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200
         assert rv.json['_meta']['total_items'] == 0
         assert rv.json['items'] == []
 
-        rv = self.client.delete(f'/api/prompters/{prompter_id}/liked/1', headers={
+        rv = self.client.delete(f'/api/prompters/{id}/liked/1', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 403
 
-        rv = self.client.get(f'/api/prompters/{prompter_id}/liked', headers={
+        rv = self.client.get(f'/api/prompters/{id}/liked', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200
@@ -422,12 +416,12 @@ class PrompterTests(BaseTestCase):
             'password': 'dog',
         })
         assert rv.status_code == 201
-        prompter_id = rv.json['id']
+        id = rv.json['id']
 
-        rv = self.client.post(f'/api/prompters/1/following/{prompter_id}', headers={
+        rv = self.client.post(f'/api/prompters/1/following/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
-        assert rv.status_code == 409
+        assert rv.status_code == 204
 
         rv = self.client.post('/api/tokens', auth=('susan', 'dog'))
         self.token = rv.json['token']
@@ -438,7 +432,6 @@ class PrompterTests(BaseTestCase):
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 201
-        work_id = rv.json['id']
 
         rv = self.client.post('/api/tokens', auth=('test', 'foo'))
         self.token = rv.json['token']

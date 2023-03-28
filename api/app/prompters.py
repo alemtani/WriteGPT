@@ -17,31 +17,32 @@ def create_prompter():
     if db.session.query(Prompter).filter_by(email=data['email']).first():
         return bad_request('please use a different email address')
     prompter = Prompter()
-    prompter.from_dict(data, new_prompter=True)
+    prompter.from_dict(data)
     db.session.add(prompter)
     db.session.commit()
     response = jsonify(prompter.to_dict())
     response.status_code = 201
     response.headers['Location'] = url_for('prompters.get_prompter', id=prompter.id)
-    return prompter
+    return response
 
 @prompters.route('/prompters', methods=['GET'])
 @token_auth.login_required
 @paginated_response(model_class=Prompter, endpoint='prompters.get_prompters')
 def get_prompters():
-    return db.session.query(Prompter)
+    return db.session.query(Prompter), None
 
 @prompters.route('/prompters/<int:id>', methods=['GET'])
 @token_auth.login_required
 def get_prompter(id):
-    return jsonify(db.session.query(Prompter).get_or_404(id).to_dict())
+    prompter = db.session.get(Prompter, id) or abort(404)
+    return jsonify(prompter.to_dict())
 
 @prompters.route('/prompters/<int:id>', methods=['PUT'])
 @token_auth.login_required
 def update_prompter(id):
     if token_auth.current_user().id != id:
         abort(403)
-    prompter = db.session.query(Prompter).get_or_404(id)
+    prompter = db.session.get(Prompter, id) or abort(404)
     data = request.get_json() or {}
     if 'username' in data and data['username'] != prompter.username and \
             db.session.query(Prompter).filter_by(username=data['username']).first():
@@ -49,7 +50,10 @@ def update_prompter(id):
     if 'email' in data and data['email'] != prompter.email and \
             db.session.query(Prompter).filter_by(email=data['email']).first():
         return bad_request('please use a different email address')
-    prompter.from_dict(data, new_prompter=False)
+    if 'password' in data and ('old_password' not in data or 
+                               not prompter.check_password(data['old_password'])):
+        return bad_request('must include old_password to change password')
+    prompter.from_dict(data)
     db.session.commit()
     return jsonify(prompter.to_dict())
 
@@ -57,30 +61,30 @@ def update_prompter(id):
 @token_auth.login_required
 @paginated_response(model_class=Work, endpoint='prompters.get_prompter_works')
 def get_prompter_works(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
-    return prompter.works
+    prompter = db.session.get(Prompter, id) or abort(404)
+    return prompter.works, id
 
 @prompters.route('/prompters/<int:id>/followers', methods=['GET'])
 @token_auth.login_required
 @paginated_response(model_class=Prompter, endpoint='prompters.get_followers')
 def get_followers(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
-    return prompter.followers
+    prompter = db.session.get(Prompter, id) or abort(404)
+    return prompter.followers, id
 
 @prompters.route('/prompters/<int:id>/following', methods=['GET'])
 @token_auth.login_required
 @paginated_response(model_class=Prompter, endpoint='prompters.get_following')
 def get_following(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
-    return prompter.followed
+    prompter = db.session.get(Prompter, id) or abort(404)
+    return prompter.followed, id
 
 @prompters.route('/prompters/<int:id>/following/<target_id>', methods=['POST'])
 @token_auth.login_required
 def follow(id, target_id):
     if token_auth.current_user().id != id:
         abort(403)
-    prompter = db.session.query(Prompter).get_or_404(id)
-    target = db.session.query(Prompter).get_or_404(target_id)
+    prompter = db.session.get(Prompter, id) or abort(404)
+    target = db.session.get(Prompter, target_id) or abort(404)
     if prompter.is_following(target):
         abort(409)
     prompter.follow(target)
@@ -92,8 +96,8 @@ def follow(id, target_id):
 def unfollow(id, target_id):
     if token_auth.current_user().id != id:
         abort(403)
-    prompter = db.session.query(Prompter).get_or_404(id)
-    target = db.session.query(Prompter).get_or_404(target_id)
+    prompter = db.session.get(Prompter, id) or abort(404)
+    target = db.session.get(Prompter, target_id) or abort(404)
     if not prompter.is_following(target):
         abort(409)
     prompter.unfollow(target)
@@ -104,16 +108,16 @@ def unfollow(id, target_id):
 @token_auth.login_required
 @paginated_response(model_class=Work, endpoint='prompters.get_liked')
 def get_liked(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
-    return prompter.liked
+    prompter = db.session.get(Prompter, id) or abort(404)
+    return prompter.liked, id
 
 @prompters.route('/prompters/<int:id>/liked/<int:target_id>', methods=['POST'])
 @token_auth.login_required
 def like(id, target_id):
     if token_auth.current_user().id != id:
         abort(403)
-    prompter = db.session.query(Prompter).get_or_404(id)
-    target = db.session.query(Work).get_or_404(target_id)
+    prompter = db.session.get(Prompter, id) or abort(404)
+    target = db.session.get(Work, target_id) or abort(404)
     if prompter.is_liking(target):
         abort(409)
     prompter.like(target)
@@ -125,8 +129,8 @@ def like(id, target_id):
 def unlike(id, target_id):
     if token_auth.current_user().id != id:
         abort(403)
-    prompter = db.session.query(Prompter).get_or_404(id)
-    target = db.session.query(Work).get_or_404(target_id)
+    prompter = db.session.get(Prompter, id) or abort(404)
+    target = db.session.get(Work, target_id) or abort(404)
     if not prompter.is_liking(target):
         abort(409)
     prompter.unlike(target)
@@ -139,5 +143,5 @@ def unlike(id, target_id):
 def get_feed(id):
     if token_auth.current_user().id != id:
         abort(403)
-    prompter = db.session.query(Prompter).get_or_404(id)
-    return prompter.get_followed_works()
+    prompter = db.session.get(Prompter, id) or abort(404)
+    return prompter.followed_works(), id

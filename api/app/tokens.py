@@ -30,7 +30,7 @@ def reset():
     if not prompter:
         abort(404)
     reset_token = prompter.get_reset_password_token()
-    reset_url = f"{current_app.config['CLIENT_URL']}reset?token={reset_token}"
+    reset_url = f"{current_app.config['CLIENT_NAME']}reset?token={reset_token}"
     send_email('[WriteGPT] Reset Your Password',
                sender=current_app.config['ADMINS'][0],
                recipients=[prompter.email],

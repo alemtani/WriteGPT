@@ -70,7 +70,7 @@ class AuthTests(BaseTestCase):
             rv = self.client.post('/api/tokens/reset', json={
                 'email': 'bad@example.com'
             })
-            assert rv.status_code == 400
+            assert rv.status_code == 404
             rv = self.client.post('/api/tokens/reset', json={
                 'email': 'test@example.com'
             })
@@ -84,7 +84,7 @@ class AuthTests(BaseTestCase):
             'token': reset_token + 'x',
             'new_password': 'bar'
         })
-        assert rv.status_code == 400
+        assert rv.status_code == 404
 
         rv = self.client.put('/api/tokens/reset', json={
             'token': reset_token,

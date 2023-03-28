@@ -123,10 +123,11 @@ class Prompter(PaginatedAPIMixin, db.Model):
             return
         return db.session.get(Prompter, id)
     
-    def to_dict(self, include_email=False):
+    def to_dict(self):
         data = {
             'id': self.id,
             'username': self.username,
+            'email': self.email,
             'last_seen': self.last_seen.isoformat() + 'Z',
             'about_me': self.about_me,
             'work_count': self.works.count(),
@@ -143,15 +144,13 @@ class Prompter(PaginatedAPIMixin, db.Model):
                 'avatar': self.avatar(128)
             }
         }
-        if include_email:
-            data['email'] = self.email
         return data
     
-    def from_dict(self, data, new_prompter=False):
+    def from_dict(self, data):
         for field in ['username', 'email', 'about_me']:
             if field in data:
                 setattr(self, field, data[field])
-        if new_prompter and 'password' in data:
+        if 'password' in data:
             self.set_password(data['password'])
     
     def get_token(self, expires_in=3600):
@@ -175,7 +174,7 @@ class Prompter(PaginatedAPIMixin, db.Model):
 
 class Work(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    genre = db.Column(Enum(Genre))
+    genre = db.Column(Enum(Genre), default=Genre.default)
     title = db.Column(db.String(140), index=True, unique=True)
     body = db.Column(db.String(8000))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -210,7 +209,7 @@ class Work(PaginatedAPIMixin, db.Model):
             'title': self.title,
             'body': self.body,
             'timestamp': self.timestamp,
-            'prompter_id': self.prompter_id,
+            'prompter': self.prompter.to_dict(),
             'likers_count': self.likers.count(),
             '_links': {
                 'self': url_for('works.get_work', id=self.id),
