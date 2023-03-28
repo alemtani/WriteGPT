@@ -142,10 +142,12 @@ def unlike(user_id, target_id):
     db.session.commit()
     return {}
 
-@prompters.route('/prompters/<int:id>/feed', methods=['GET'])
+@prompters.route('/prompters/<int:user_id>/feed', methods=['GET'])
 @token_auth.login_required
-def get_feed(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
+def get_feed(user_id):
+    if token_auth.current_user().id != user_id:
+        abort(403)
+    prompter = db.session.query(Prompter).get_or_404(user_id)
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     data = Prompter.to_collection.dict(prompter.get_followed_works(), page, per_page, 'prompters.get_feed')

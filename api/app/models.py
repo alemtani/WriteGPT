@@ -176,7 +176,7 @@ class Prompter(PaginatedAPIMixin, db.Model):
 class Work(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     genre = db.Column(Enum(Genre))
-    title = db.Column(db.String(140))
+    title = db.Column(db.String(140), index=True, unique=True)
     body = db.Column(db.String(8000))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     prompter_id = db.Column(db.Integer, db.ForeignKey('prompter.id'))
@@ -219,10 +219,9 @@ class Work(PaginatedAPIMixin, db.Model):
         }
         return data
     
-    def from_dict(self, data, new_work=False):
-        for field in ['title', 'prompter_id']:
-            if field in data:
-                setattr(self, field, data[field])
+    def from_dict(self, data):
+        if 'title' in data:
+            self.title = data['title']
         if 'genre' in data:
             if data['genre'] == 'fiction':
                 self.genre = Genre.fiction
@@ -234,5 +233,6 @@ class Work(PaginatedAPIMixin, db.Model):
                 self.genre = Genre.drama
             else:
                 self.genre = Genre.default
-        if new_work:
-            self.generate_completion()
+        else:
+            self.genre = Genre.default
+        self.generate_completion()
