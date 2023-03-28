@@ -56,15 +56,13 @@ class PaginationTests(BaseTestCase):
         assert rv.json['_links']['next'] is None
         assert rv.json['_links']['prev'] == '/api/works?page=10&per_page=10'
 
-    # def test_pagination_invalid(self):
-    #     rv = self.client.get('/api/works?page=-2')
-    #     assert rv.status_code == 400
-    #     rv = self.client.get('/api/works?page=110')
-    #     assert rv.status_code == 400
-    #     rv = self.client.get('/api/works?per_page=0')
-    #     assert rv.status_code == 400
-    #     rv = self.client.get('/api/posts?per_page=-10')
-    #     assert rv.status_code == 400
+    def test_pagination_invalid(self):
+        rv = self.client.get('/api/works?page=0')
+        assert rv.status_code == 400
+        rv = self.client.get('/api/works?page=12')
+        assert rv.status_code == 400
+        rv = self.client.get('/api/works?per_page=0')
+        assert rv.status_code == 400
 
     def test_pagination_custom_limit(self):
         rv = self.client.get('/api/works?page=3&per_page=5')

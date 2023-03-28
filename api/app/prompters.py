@@ -1,5 +1,6 @@
 from app import db
 from app.auth import token_auth
+from app.decorators import paginated_response
 from app.errors import bad_request
 from app.models import Prompter, Work
 from flask import abort, Blueprint, jsonify, request, url_for
@@ -8,11 +9,9 @@ prompters = Blueprint('prompters', __name__)
 
 @prompters.route('/prompters', methods=['GET'])
 @token_auth.login_required
+@paginated_response(model_class=Prompter, endpoint='prompters.get_prompters')
 def get_prompters():
-    page = request.args.get('page', 1, type=int)
-    per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Prompter.to_collection_dict(db.session.query(Prompter), page, per_page, 'prompters.get_prompters')
-    return jsonify(data)
+    return db.session.query(Prompter)
 
 @prompters.route('/prompters', methods=['POST'])
 def create_prompter():
@@ -56,30 +55,24 @@ def update_prompter(id):
 
 @prompters.route('/prompters/<int:id>/works', methods=['GET'])
 @token_auth.login_required
+@paginated_response(model_class=Work, endpoint='prompters.get_prompter_works')
 def get_prompter_works(id):
     prompter = db.session.query(Prompter).get_or_404(id)
-    page = request.args.get('page', 1, type=int)
-    per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Work.to_collection_dict(prompter.works, page, per_page, 'prompters.get_prompter_works')
-    return jsonify(data)
+    return prompter.works
 
 @prompters.route('/prompters/<int:id>/followers', methods=['GET'])
 @token_auth.login_required
+@paginated_response(model_class=Prompter, endpoint='prompters.get_followers')
 def get_followers(id):
     prompter = db.session.query(Prompter).get_or_404(id)
-    page = request.args.get('page', 1, type=int)
-    per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Prompter.to_collection_dict(prompter.followers, page, per_page, 'prompters.get_followers')
-    return jsonify(data)
+    return prompter.followers
 
 @prompters.route('/prompters/<int:id>/following', methods=['GET'])
 @token_auth.login_required
+@paginated_response(model_class=Prompter, endpoint='prompters.get_following')
 def get_following(id):
     prompter = db.session.query(Prompter).get_or_404(id)
-    page = request.args.get('page', 1, type=int)
-    per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Prompter.to_collection_dict(prompter.followed, page, per_page, 'prompters.get_followed')
-    return jsonify(data)
+    return prompter.followed
 
 @prompters.route('/prompters/<int:id>/following/<target_id>', methods=['POST'])
 @token_auth.login_required
@@ -109,12 +102,10 @@ def unfollow(id, target_id):
 
 @prompters.route('/prompters/<int:id>/liked', methods=['GET'])
 @token_auth.login_required
+@paginated_response(model_class=Work, endpoint='prompters.get_liked')
 def get_liked(id):
     prompter = db.session.query(Prompter).get_or_404(id)
-    page = request.args.get('page', 1, type=int)
-    per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Prompter.to_collection_dict(prompter.liked, page, per_page, 'prompters.get_liked')
-    return jsonify(data)
+    return prompter.liked
 
 @prompters.route('/prompters/<int:id>/liked/<int:target_id>', methods=['POST'])
 @token_auth.login_required
@@ -144,11 +135,9 @@ def unlike(id, target_id):
 
 @prompters.route('/prompters/<int:id>/feed', methods=['GET'])
 @token_auth.login_required
+@paginated_response(model_class=Work, endpoint='prompters.get_feed')
 def get_feed(id):
     if token_auth.current_user().id != id:
         abort(403)
     prompter = db.session.query(Prompter).get_or_404(id)
-    page = request.args.get('page', 1, type=int)
-    per_page = min(request.args.get('per_page', 10, type=int), 100)
-    data = Prompter.to_collection_dict(prompter.get_followed_works(), page, per_page, 'prompters.get_feed')
-    return jsonify(data)
+    return prompter.get_followed_works()
