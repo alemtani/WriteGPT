@@ -7,14 +7,13 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 class Config(object):
     # Secret Key
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
 
     # API Keys
     OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
 
     # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'postgresql://postgres:postgres@localhost/writegpt'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Email
@@ -25,3 +24,6 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
     ADMINS = ['alex.m.tanimoto@gmail.com']
+
+    # Client
+    CLIENT_URL = os.environ.get('CLIENT_URL')

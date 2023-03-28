@@ -1,6 +1,7 @@
 from app import db
 from app.errors import error_response
 from app.models import Prompter
+from flask import current_app
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 
 basic_auth = HTTPBasicAuth()
@@ -18,6 +19,8 @@ def basic_auth_error(status):
 
 @token_auth.verify_token
 def verify_token(token):
+    if current_app.config['DISABLE_AUTH']:
+        return db.session.get(Prompter, 1)
     return Prompter.check_token(token) if token else None
 
 @token_auth.error_handler

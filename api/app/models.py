@@ -117,11 +117,11 @@ class Prompter(PaginatedAPIMixin, db.Model):
     @staticmethod
     def verify_reset_password_token(token):
         try:
-            id = jwt.decode(token, current_app.config['SECRETY_KEY'], 
+            id = jwt.decode(token, current_app.config['SECRET_KEY'], 
                             algorithms=['HS256'])['reset_password']
         except:
             return
-        return db.session.query(Prompter).get(id)
+        return db.session.get(Prompter, id)
     
     def to_dict(self, include_email=False):
         data = {
@@ -135,9 +135,9 @@ class Prompter(PaginatedAPIMixin, db.Model):
             'liked_count': self.liked.count(),
             '_links': {
                 'self': url_for('prompters.get_prompter', id=self.id),
-                'works': url_for('prompters.get_works', id=self.id),
+                'works': url_for('prompters.get_prompter_works', id=self.id),
                 'followers': url_for('prompters.get_followers', id=self.id),
-                'followed': url_for('prompters.get_followed', id=self.id),
+                'following': url_for('prompters.get_following', id=self.id),
                 'liked': url_for('prompters.get_liked', id=self.id),
                 'feed': url_for('prompters.get_feed', id=self.id),
                 'avatar': self.avatar(128)
