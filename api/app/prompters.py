@@ -7,12 +7,6 @@ from flask import abort, Blueprint, jsonify, request, url_for
 
 prompters = Blueprint('prompters', __name__)
 
-@prompters.route('/prompters', methods=['GET'])
-@token_auth.login_required
-@paginated_response(model_class=Prompter, endpoint='prompters.get_prompters')
-def get_prompters():
-    return db.session.query(Prompter)
-
 @prompters.route('/prompters', methods=['POST'])
 def create_prompter():
     data = request.get_json() or {}
@@ -30,6 +24,12 @@ def create_prompter():
     response.status_code = 201
     response.headers['Location'] = url_for('prompters.get_prompter', id=prompter.id)
     return prompter
+
+@prompters.route('/prompters', methods=['GET'])
+@token_auth.login_required
+@paginated_response(model_class=Prompter, endpoint='prompters.get_prompters')
+def get_prompters():
+    return db.session.query(Prompter)
 
 @prompters.route('/prompters/<int:id>', methods=['GET'])
 @token_auth.login_required
@@ -85,7 +85,7 @@ def follow(id, target_id):
         abort(409)
     prompter.follow(target)
     db.session.commit()
-    return {}
+    return {}, 204
 
 @prompters.route('/prompters/<int:id>/following/<int:target_id>', methods=['DELETE'])
 @token_auth.login_required
@@ -98,7 +98,7 @@ def unfollow(id, target_id):
         abort(409)
     prompter.unfollow(target)
     db.session.commit()
-    return {}
+    return {}, 204
 
 @prompters.route('/prompters/<int:id>/liked', methods=['GET'])
 @token_auth.login_required
@@ -118,7 +118,7 @@ def like(id, target_id):
         abort(409)
     prompter.like(target)
     db.session.commit()
-    return {}
+    return {}, 204
 
 @prompters.route('/prompters/<int:id>/liked/<int:target_id>', methods=['DELETE'])
 @token_auth.login_required
@@ -131,7 +131,7 @@ def unlike(id, target_id):
         abort(409)
     prompter.unlike(target)
     db.session.commit()
-    return {}
+    return {}, 204
 
 @prompters.route('/prompters/<int:id>/feed', methods=['GET'])
 @token_auth.login_required

@@ -11,9 +11,9 @@ def paginated_response(model_class, endpoint):
             query = func(*args, **kwargs)
             data = model_class.to_collection_dict(query, page, per_page, endpoint)
             if page < 1 or page > data['_meta']['total_pages']:
-                return bad_request('please use a page that is between 1 and total_pages')
+                return bad_request('page must be between 1 and total_pages')
             if per_page < 1:
-                return bad_request('please use a per_page that is at least 1')
+                return bad_request('per_page must be at least 1')
             return jsonify(data)
         return paginate
     return decorator

@@ -3,7 +3,7 @@ from app.auth import basic_auth, token_auth
 from app.email import send_email
 from app.errors import bad_request
 from app.models import Prompter
-from flask import Blueprint, current_app, jsonify, request
+from flask import abort, Blueprint, current_app, jsonify, request
 
 tokens = Blueprint('tokens', __name__)
 
@@ -28,7 +28,7 @@ def reset():
         return bad_request('must include email field')
     prompter = db.session.query(Prompter).filter_by(email=data['email']).first()
     if not prompter:
-        return bad_request('no prompter with this email exists')
+        abort(404)
     reset_token = prompter.get_reset_password_token()
     reset_url = f"{current_app.config['CLIENT_URL']}reset?token={reset_token}"
     send_email('[WriteGPT] Reset Your Password',
@@ -46,7 +46,7 @@ def password_reset():
         return bad_request('must include token and new_password fields')
     prompter = Prompter.verify_reset_password_token(data['token'])
     if not prompter:
-        return bad_request('please provide a valid reset password token')
+        abort(404)
     prompter.set_password(data['new_password'])
     db.session.commit()
     return {}, 204

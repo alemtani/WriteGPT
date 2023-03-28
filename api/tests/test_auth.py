@@ -15,12 +15,14 @@ class AuthTests(BaseTestCase):
         token = rv.json['token']
 
         rv = self.client.get('/api/prompters', headers={
-            'Authorization': f'Bearer {token}'})
+            'Authorization': f'Bearer {token}'
+        })
         assert rv.status_code == 200
         assert rv.json['items'][0]['username'] == 'test'
 
         rv = self.client.get('/api/prompters', headers={
-            'Authorization': f'Bearer {token + "x"}'})
+            'Authorization': f'Bearer {token + "x"}'
+        })
         assert rv.status_code == 401
 
     def test_token_expired(self):
@@ -31,7 +33,8 @@ class AuthTests(BaseTestCase):
         with mock.patch('app.models.datetime') as dt:
             dt.utcnow.return_value = datetime.utcnow() + timedelta(days=1)
             rv = self.client.get('/api/prompters', headers={
-                'Authorization': f'Bearer {token}'})
+                'Authorization': f'Bearer {token}'
+            })
             assert rv.status_code == 401
     
     def test_revoke(self):
@@ -40,15 +43,18 @@ class AuthTests(BaseTestCase):
         token = rv.json['token']
 
         rv = self.client.get('/api/prompters', headers={
-            'Authorization': f'Bearer {token}'})
+            'Authorization': f'Bearer {token}'
+        })
         assert rv.status_code == 200
 
         rv = self.client.delete('/api/tokens', headers={
-            'Authorization': f'Bearer {token}'})
+            'Authorization': f'Bearer {token}'
+        })
         assert rv.status_code == 204
 
         rv = self.client.get('/api/prompters', headers={
-            'Authorization': f'Bearer {token}'})
+            'Authorization': f'Bearer {token}'
+        })
         assert rv.status_code == 401
 
     def test_no_login(self):
