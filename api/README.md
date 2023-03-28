@@ -73,6 +73,6 @@ Here are the variables you need to define below. Follow instructions from the [S
 
 ## Resources
 
-Please check out the [Flask Mega-Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world) for more information on building these sort of APIs.
+For more information on the basics of Flask and an introduction to building Flask APIs, please check out the [Flask Mega-Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world).
 
-Additionally, you may find [this public API](https://github.com/miguelgrinberg/microblog-api) useful for actually building and testing the API routes.
+Additionally, for building a practical API and testing it out, you can get inspiration from [this public API](https://github.com/miguelgrinberg/microblog-api).
