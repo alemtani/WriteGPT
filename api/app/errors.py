@@ -1,3 +1,4 @@
+from app import db
 from flask import Blueprint, jsonify
 from werkzeug.http import HTTP_STATUS_CODES
 
@@ -13,3 +14,12 @@ def error_response(status_code, message=None):
 
 def bad_request(message):
     return error_response(400, message)
+
+@errors.app_errorhandler(404)
+def not_found_error(error):
+    return error_response(404)
+
+@errors.app_errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    return error_response(500)

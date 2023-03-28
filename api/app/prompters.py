@@ -32,17 +32,17 @@ def create_prompter():
     response.headers['Location'] = url_for('prompters.get_prompter', id=prompter.id)
     return prompter
 
-@prompters.route('/prompters/<int:id>', methods=['GET'])
+@prompters.route('/prompters/<int:user_id>', methods=['GET'])
 @token_auth.login_required
-def get_prompter(id):
-    return jsonify(db.session.query(Prompter).get_or_404(id).to_dict())
+def get_prompter(user_id):
+    return jsonify(db.session.query(Prompter).get_or_404(user_id).to_dict())
 
-@prompters.route('/prompters/<int:id>', methods=['PUT'])
+@prompters.route('/prompters/<int:user_id>', methods=['PUT'])
 @token_auth.login_required
-def update_prompter(id):
-    if token_auth.current_user().id != id:
+def update_prompter(user_id):
+    if token_auth.current_user().id != user_id:
         abort(403)
-    prompter = db.session.query(Prompter).get_or_404(id)
+    prompter = db.session.query(Prompter).get_or_404(user_id)
     data = request.get_json() or {}
     if 'username' in data and data['username'] != prompter.username and \
             db.session.query(Prompter).filter_by(username=data['username']).first():
@@ -54,61 +54,93 @@ def update_prompter(id):
     db.session.commit()
     return jsonify(prompter.to_dict())
 
-@prompters.route('/prompters/<int:id>/works', methods=['GET'])
+@prompters.route('/prompters/<int:user_id>/works', methods=['GET'])
 @token_auth.login_required
-def get_prompter_works(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
+def get_prompter_works(user_id):
+    prompter = db.session.query(Prompter).get_or_404(user_id)
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     data = Work.to_collection.dict(prompter.works, page, per_page, 'prompters.get_prompter_works')
     return jsonify(data)
 
-@prompters.route('/prompters/<int:id>/followers', methods=['GET'])
+@prompters.route('/prompters/<int:user_id>/followers', methods=['GET'])
 @token_auth.login_required
-def get_followers(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
+def get_followers(user_id):
+    prompter = db.session.query(Prompter).get_or_404(user_id)
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     data = Prompter.to_collection.dict(prompter.followers, page, per_page, 'prompters.get_followers')
     return jsonify(data)
 
-@prompters.route('/prompters/<int:id>/followed', methods=['GET'])
+@prompters.route('/prompters/<int:user_id>/following', methods=['GET'])
 @token_auth.login_required
-def get_followed(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
+def get_following(user_id):
+    prompter = db.session.query(Prompter).get_or_404(user_id)
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     data = Prompter.to_collection.dict(prompter.followed, page, per_page, 'prompters.get_followed')
     return jsonify(data)
 
-@prompters.route('/prompters/<int:id>/followed', methods=['POST'])
+@prompters.route('/prompters/<int:user_id>/following/<target_id>', methods=['POST'])
 @token_auth.login_required
-def follow(id):
-    pass
+def follow(user_id, target_id):
+    if token_auth.current_user().id != user_id:
+        abort(403)
+    prompter = db.session.query(Prompter).get_or_404(user_id)
+    target = db.session.query(Prompter).get_or_404(target_id)
+    if prompter.is_following(target):
+        abort(409)
+    prompter.follow(target)
+    db.session.commit()
+    return {}
 
-@prompters.route('/prompters/<int:follower_id>/followed/<int:followed_id>', methods=['DELETE'])
+@prompters.route('/prompters/<int:user_id>/following/<int:target_id>', methods=['DELETE'])
 @token_auth.login_required
-def unfollow(follower_id, followed_id):
-    pass
+def unfollow(user_id, target_id):
+    if token_auth.current_user().id != user_id:
+        abort(403)
+    prompter = db.session.query(Prompter).get_or_404(user_id)
+    target = db.session.query(Prompter).get_or_404(target_id)
+    if not prompter.is_following(target):
+        abort(409)
+    prompter.unfollow(target)
+    db.session.commit()
+    return {}
 
-@prompters.route('/prompters/<int:id>/liked', methods=['GET'])
+@prompters.route('/prompters/<int:user_id>/liked', methods=['GET'])
 @token_auth.login_required
-def get_liked(id):
-    prompter = db.session.query(Prompter).get_or_404(id)
+def get_liked(user_id):
+    prompter = db.session.query(Prompter).get_or_404(user_id)
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 10, type=int), 100)
     data = Prompter.to_collection.dict(prompter.liked, page, per_page, 'prompters.get_liked')
     return jsonify(data)
 
-@prompters.route('/prompters/<int:id>/liked', methods=['POST'])
+@prompters.route('/prompters/<int:user_id>/liked/<int:target_id>', methods=['POST'])
 @token_auth.login_required
-def like(id):
-    pass
+def like(user_id, target_id):
+    if token_auth.current_user().id != user_id:
+        abort(403)
+    prompter = db.session.query(Prompter).get_or_404(user_id)
+    target = db.session.query(Work).get_or_404(target_id)
+    if prompter.is_liking(target):
+        abort(409)
+    prompter.like(target)
+    db.session.commit()
+    return {}
 
-@prompters.route('/prompters/<int:liker_id>/liked/<int:liked_id>', methods=['DELETE'])
+@prompters.route('/prompters/<int:user_id>/liked/<int:target_id>', methods=['DELETE'])
 @token_auth.login_required
-def unlike(liker_id, liked_id):
-    pass
+def unlike(user_id, target_id):
+    if token_auth.current_user().id != user_id:
+        abort(403)
+    prompter = db.session.query(Prompter).get_or_404(user_id)
+    target = db.session.query(Work).get_or_404(target_id)
+    if not prompter.is_liking(target):
+        abort(409)
+    prompter.unlike(target)
+    db.session.commit()
+    return {}
 
 @prompters.route('/prompters/<int:id>/feed', methods=['GET'])
 @token_auth.login_required

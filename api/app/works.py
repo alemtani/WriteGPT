@@ -17,7 +17,9 @@ def get_works():
 @works.route('/works', methods=['POST'])
 @token_auth.login_required
 def create_work():
-    pass
+    prompter = token_auth.current_user()
+    data = request.get_json() or {}
+    # TODO
 
 @works.route('/works/<int:id>', methods=['GET'])
 @token_auth.login_required
