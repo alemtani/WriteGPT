@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import Spinner from 'react-bootstrap/Spinner';
 import { useApi } from '../contexts/ApiProvider';
-import Work from './Work';
+import Story from './Story';
 import More from './More';
 
-export default function Works({ content }) {
-  const [works, setWorks] = useState();
+export default function Stories({ content }) {
+  const [stories, setStories] = useState();
   const [pagination, setPagination] = useState();
   const api = useApi();
 
@@ -16,13 +16,13 @@ export default function Works({ content }) {
       url = '/prompters/1/feed';
       break;
     case 'explore':
-      url = '/works';
+      url = '/stories';
       break;
     case 'liked':
       url = '/prompters/1/liked';
       break;
     default:
-      url = `/prompters/${content}/works`;
+      url = `/prompters/${content}/stories`;
       break;
   }
 
@@ -31,10 +31,10 @@ export default function Works({ content }) {
       const response = await api.get(url);
       console.log(response);
       if (response.ok) {
-        setWorks(response.body.items);
+        setStories(response.body.items);
         setPagination(response.body._links);
       } else {
-        setWorks(null);
+        setStories(null);
       }
     })();
   }, [api, url]);
@@ -43,25 +43,25 @@ export default function Works({ content }) {
     const next = pagination.next.substring(4);
     const response = await api.get(next);
     if (response.ok) {
-      setWorks([...works, ...response.body.items]);
+      setStories([...stories, ...response.body.items]);
       setPagination(response.body._links);
     }
   }
 
   return (
     <>
-      {works === undefined ?
+      {stories === undefined ?
         <Spinner animation="border" />
       :
         <>
-          {works === null ?
-            <p>Could not retrieve works.</p>
+          {stories === null ?
+            <p>Could not retrieve stories.</p>
           :
             <>
-              {works.length === 0 ?
-                <p>There are no works to display.</p>
+              {stories.length === 0 ?
+                <p>There are no stories to display.</p>
               :
-                works.map(work => <Work key={work.id} work={work} />)
+                stories.map(story => <Story key={story.id} story={story} />)
               }
               <More pagination={pagination} loadNextPage={loadNextPage} />
             </>

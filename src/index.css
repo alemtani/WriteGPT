@@ -39,31 +39,31 @@
   margin-top: 10px;
 }
 
-.Work {
+.Story {
   align-items: start;
   padding-top: 5px;
   border-bottom: 1px solid #eee;
 }
 
-.Work:hover {
+.Story:hover {
   background-color: #f8f8f8;
 }
 
-.Work a {
+.Story a {
   color: #14c;
   text-decoration: none;
 }
 
-.Work a:visited {
+.Story a:visited {
   color: #14c;
 }
 
-.Work .prompter-link {
+.Story .prompter-link {
   color: #444;
   font-style: italic;
 }
 
-.Work .prompter-link:visited {
+.Story .prompter-link:visited {
   color: #444;
 }
 

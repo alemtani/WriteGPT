@@ -6,7 +6,7 @@ import { useParams } from 'react-router-dom';
 import Body from '../components/Body';
 import TimeAgo from '../components/TimeAgo';
 import { useApi } from '../contexts/ApiProvider';
-import Works from '../components/Works';
+import Stories from '../components/Stories';
 
 export default function PrompterPage() {
     const { id } = useParams();
@@ -27,7 +27,7 @@ export default function PrompterPage() {
             :
                 <>
                     {prompter === null ?
-                        <p>Could not retrieve prompter works.</p>
+                        <p>Could not retrieve prompter stories.</p>
                     :
                         <>
                             <Stack direction="horizontal" gap={4}>
@@ -40,7 +40,7 @@ export default function PrompterPage() {
                                     </p>
                                 </div>
                             </Stack>
-                            <Works content={id} />
+                            <Stories content={id} />
                         </>
                     }
                 </>

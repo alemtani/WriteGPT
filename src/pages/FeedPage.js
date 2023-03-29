@@ -1,10 +1,10 @@
 import Body from '../components/Body';
-import Works from '../components/Works';
+import Stories from '../components/Stories';
 
 export default function FeedPage() {
     return (
         <Body sidebar>
-            <Works content='feed' />
+            <Stories content='feed' />
         </Body>
     )
 }
