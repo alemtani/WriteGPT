@@ -81,6 +81,18 @@ Here is an environment variable you will need to set when debugging from time-to
 - `DISABLE_AUTH`
   - In some cases (but **not** all), when you are debugging, you will set this to `True` (in the `.env` file, set to `1`).
 
+## Development
+
+To run Flask on debugging mode, make sure to set `FLASK_DEBUG=1`.
+  
+## Testing
+
+To run the test suite in the `tests` folder, run the following command in the terminal:
+
+```
+python -m unittest discover tests
+```
+
 ## Resources
 
 For more information on the basics of Flask and an introduction to building Flask APIs, please check out the [Flask Mega-Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world).
