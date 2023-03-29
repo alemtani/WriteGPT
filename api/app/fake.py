@@ -35,7 +35,7 @@ def prompters(num):  # pragma: no cover
 @click.argument('num', type=int)
 def works(num):  # pragma: no cover
     """Create the given number of fake works, assigned to random prompters."""
-    prompters = db.session.scalars(db.session.query(Prompter)).all()
+    prompters = db.session.query(Prompter).all()
     works = []
     for i in range(num):
         prompter = random.choice(prompters)
