@@ -51,7 +51,7 @@ Here is an overview of the steps:
 Run the following command in the project directory:
 
 ```
-yarn install
+npm install
 ```
 
 ### 2. Set the environment variables
@@ -69,13 +69,13 @@ For production, set to the production server name.
 To start the frontend, run the following:
 
 ```
-yarn start
+npm start
 ```
 
 To start the backend (in a **separate** terminal), run the following:
 
 ```
-yarn start-api
+npm start-api
 ```
 
 ## Learn More
