@@ -58,7 +58,7 @@ npm install
 
 Create a `.env` file with the following environment variable:
 
-#### `REACT_APP_PROXY_TARGET`
+#### `REACT_APP_BASE_API_URL`
 
 For development, set to `http://localhost:5000`.
 
