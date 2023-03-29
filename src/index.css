@@ -34,3 +34,31 @@
 .Sidebar .nav-item .active {
   background-color: #def;
 }
+
+.Content {
+  margin-top: 10px;
+}
+
+.Work {
+  align-items: start;
+  padding-top: 5px;
+  border-bottom: 1px solid #eee;
+}
+
+.Work:hover {
+  background-color: #f8f8f8;
+}
+
+.Work a {
+  color: #14c;
+  text-decoration: none;
+}
+
+.Work a:visited {
+  color: #14c;
+}
+
+.Work a .prompter-link {
+  color: #444;
+  font-style: italic;
+}

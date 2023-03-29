@@ -1,44 +1,42 @@
-export default function Works() {
-    const works = [
-        {
-          id: '1',
-          title: 'Hello, world!',
-          genre: 'fiction',
-          body: 'This is a test work',
-          timestamp: 'a minute ago',
-          prompter: {
-            username: 'susan',
-          },
-        },
-        {
-          id: '2',
-          title: 'Second work',
-          genre: 'nonfiction',
-          body: 'This is a second test work',
-          timestamp: 'an hour ago',
-          prompter: {
-            username: 'john',
-          },
-        },
-    ];
+import { useState, useEffect } from 'react';
+import Spinner from 'react-bootstrap/Spinner';
+import Work from './Work';
 
-    return (
+export default function Works() {
+  const [works, setWorks] = useState();
+
+  useEffect(() => {
+    (async () => {
+      const response = await fetch('/api/prompters/1/feed');
+      console.log(response);
+      if (response.ok) {
+        const results = await response.json();
+        setWorks(results.items);
+      } else {
+        setWorks(null);
+      }
+    })();
+  }, []);
+
+  return (
+    <>
+      {works === undefined ?
+        <Spinner animation="border" />
+      :
         <>
-            {works.length === 0 ?
-              <p>There are no works to display.</p>
-            :
-              works.map(work => {
-                return (
-                  <p key={work.id}>
-                    <b>{work.title}</b>
-                    <br />
-                    A work of {work.genre} prompted {work.timestamp} by <i>{work.prompter.username}</i>
-                    <br />
-                    {work.body}
-                  </p>
-                );
-              })
-            }
+          {works === null ?
+            <p>Could not retrieve works.</p>
+          :
+            <>
+              {works.length === 0 ?
+                <p>There are no works to display.</p>
+              :
+                works.map(work => <Work key={work.id} work={work} />)
+              }
+            </>
+          }
         </>
-    )
+      }
+    </>
+  );
 }

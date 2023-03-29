@@ -13,7 +13,7 @@ class Config(object):
     # Integration
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    CLIENT_NAME = os.environ.get('CLIENT_NAME')
+    BASE_CLIENT_URL = os.environ.get('BASE_CLIENT_URL')
 
     # Email
     MAIL_SERVER = os.environ.get('MAIL_SERVER')
