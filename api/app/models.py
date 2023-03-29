@@ -1,5 +1,4 @@
 import base64
-import enum
 import jwt
 import openai
 import os
@@ -8,7 +7,6 @@ from app import db
 from datetime import datetime, timedelta
 from flask import current_app, url_for
 from hashlib import md5
-from sqlalchemy import Enum
 from time import time
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -19,7 +17,7 @@ followers = db.Table('follower',
 
 likers = db.Table('liker',
     db.Column('liker_id', db.ForeignKey('prompter.id'), primary_key=True),
-    db.Column('liked_id', db.ForeignKey('work.id'), primary_key=True)
+    db.Column('liked_id', db.ForeignKey('story.id'), primary_key=True)
 )
 
 class PaginatedAPIMixin(object):
@@ -44,13 +42,6 @@ class PaginatedAPIMixin(object):
         }
         return data
 
-class Genre(enum.Enum):
-    default = 0
-    fiction = 1
-    nonfiction = 2
-    poetry = 3
-    drama = 4
-
 class Prompter(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
@@ -60,13 +51,13 @@ class Prompter(PaginatedAPIMixin, db.Model):
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
     token = db.Column(db.String(32), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
-    works = db.relationship('Work', backref='prompter', lazy='dynamic')
+    stories = db.relationship('Story', backref='prompter', lazy='dynamic')
     followed = db.relationship(
         'Prompter', secondary=followers,
         primaryjoin=(followers.c.follower_id==id),
         secondaryjoin=(followers.c.followed_id==id),
         backref=db.backref('followers',lazy='dynamic'), lazy='dynamic')
-    liked = db.relationship('Work', secondary=likers, back_populates='likers', lazy='dynamic')
+    liked = db.relationship('Story', secondary=likers, back_populates='likers', lazy='dynamic')
 
     def __repr__(self):
         return f'<Prompter {self.username}>'
@@ -92,22 +83,22 @@ class Prompter(PaginatedAPIMixin, db.Model):
     def is_following(self, prompter):
         return self.followed.filter(followers.c.followed_id == prompter.id).count() > 0
     
-    def like(self, work):
-        if not self.is_liking(work):
-            self.liked.append(work)
+    def like(self, story):
+        if not self.is_liking(story):
+            self.liked.append(story)
     
-    def unlike(self, work):
-        if self.is_liking(work):
-            self.liked.remove(work)
+    def unlike(self, story):
+        if self.is_liking(story):
+            self.liked.remove(story)
     
-    def is_liking(self, work):
-        return self.liked.filter(likers.c.liked_id == work.id).count() > 0
+    def is_liking(self, story):
+        return self.liked.filter(likers.c.liked_id == story.id).count() > 0
     
-    def followed_works(self):
-        return db.session.query(Work).join(
-            followers, (followers.c.followed_id == Work.prompter_id)).filter(
+    def followed_stories(self):
+        return db.session.query(Story).join(
+            followers, (followers.c.followed_id == Story.prompter_id)).filter(
                 followers.c.follower_id == self.id).order_by(
-                    Work.timestamp.desc())
+                    Story.timestamp.desc())
     
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
@@ -130,13 +121,13 @@ class Prompter(PaginatedAPIMixin, db.Model):
             'email': self.email,
             'last_seen': self.last_seen.isoformat() + 'Z',
             'about_me': self.about_me,
-            'work_count': self.works.count(),
+            'story_count': self.stories.count(),
             'follower_count': self.followers.count(),
             'followed_count': self.followed.count(),
             'liked_count': self.liked.count(),
             '_links': {
                 'self': url_for('prompters.get_prompter', id=self.id),
-                'works': url_for('prompters.get_prompter_works', id=self.id),
+                'stories': url_for('prompters.get_prompter_stories', id=self.id),
                 'followers': url_for('prompters.get_followers', id=self.id),
                 'following': url_for('prompters.get_following', id=self.id),
                 'liked': url_for('prompters.get_liked', id=self.id),
@@ -176,9 +167,8 @@ class Prompter(PaginatedAPIMixin, db.Model):
         prompter.ping()
         return prompter
 
-class Work(PaginatedAPIMixin, db.Model):
+class Story(PaginatedAPIMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    genre = db.Column(Enum(Genre), default=Genre.default)
     title = db.Column(db.String(140), index=True, unique=True)
     body = db.Column(db.String(8000))
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
@@ -186,16 +176,10 @@ class Work(PaginatedAPIMixin, db.Model):
     likers = db.relationship(Prompter, secondary=likers, back_populates='liked', lazy='dynamic')
 
     def __repr__(self):
-        return f'<Work {self.title} ({self.genre})>'
-    
-    def get_genre(self):
-        return f'{self.genre}'[6:]
+        return f'<Story {self.title}>'
     
     def generate_prompt(self):
-        if self.genre != Genre.default:
-            return f"In no more than 8000 characters, write a piece of {self.get_genre()} that responds to the following prompt: '{self.title}'"
-        else:
-            return f"In no more than 8000 characters, write a creative piece that responds to the following prompt: '{self.title}'"
+        return f"In no more than 8000 characters, write a story that responds to the following prompt: '{self.title}'"
         
     def generate_completion(self):
         response = openai.Completion.create(
@@ -209,15 +193,14 @@ class Work(PaginatedAPIMixin, db.Model):
     def to_dict(self):
         data = {
             'id': self.id,
-            'genre': self.get_genre(),
             'title': self.title,
             'body': self.body,
             'timestamp': self.timestamp,
             'prompter': self.prompter.to_dict(),
             'likers_count': self.likers.count(),
             '_links': {
-                'self': url_for('works.get_work', id=self.id),
-                'likers': url_for('works.get_likers', id=self.id)
+                'self': url_for('stories.get_story', id=self.id),
+                'likers': url_for('stories.get_likers', id=self.id)
             }
         }
         return data
@@ -225,17 +208,4 @@ class Work(PaginatedAPIMixin, db.Model):
     def from_dict(self, data):
         if 'title' in data:
             self.title = data['title']
-        if 'genre' in data:
-            if data['genre'] == 'fiction':
-                self.genre = Genre.fiction
-            elif data['genre'] == 'nonfiction':
-                self.genre = Genre.nonfiction
-            elif data['genre'] == 'poetry':
-                self.genre = Genre.poetry
-            elif data['genre'] == 'drama':
-                self.genre = Genre.drama
-            else:
-                self.genre = Genre.default
-        else:
-            self.genre = Genre.default
         self.generate_completion()

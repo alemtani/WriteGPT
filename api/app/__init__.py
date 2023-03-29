@@ -29,8 +29,8 @@ def create_app(config_class=Config):
     app.register_blueprint(prompters, url_prefix='/api')
     from app.tokens import tokens
     app.register_blueprint(tokens, url_prefix='/api')
-    from app.works import works
-    app.register_blueprint(works, url_prefix='/api')
+    from app.stories import stories
+    app.register_blueprint(stories, url_prefix='/api')
     from app.fake import fake
     app.register_blueprint(fake)
 

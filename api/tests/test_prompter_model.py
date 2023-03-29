@@ -1,5 +1,5 @@
 from app import db
-from app.models import Genre, Prompter, Work
+from app.models import Prompter, Story
 from datetime import datetime, timedelta
 from tests.base_test_case import BaseTestCase
 
@@ -41,28 +41,28 @@ class PrompterModelTests(BaseTestCase):
     
     def test_like(self):
         p = Prompter(username='susan', email='susan@example.com')
-        w = Work(genre=Genre.default, title='test', prompter=p)
+        s = Story(title='test', prompter=p)
         db.session.add(p)
-        db.session.add(w)
+        db.session.add(s)
         db.session.commit()
         self.assertEqual(p.liked.all(), [])
-        self.assertEqual(w.likers.all(), [])
+        self.assertEqual(s.likers.all(), [])
 
-        p.like(w)
+        p.like(s)
         db.session.commit()
-        self.assertTrue(p.is_liking(w))
+        self.assertTrue(p.is_liking(s))
         self.assertEqual(p.liked.count(), 1)
         self.assertEqual(p.liked.first().title, 'test')
-        self.assertEqual(w.likers.count(), 1)
-        self.assertEqual(w.likers.first().username, 'susan')
+        self.assertEqual(s.likers.count(), 1)
+        self.assertEqual(s.likers.first().username, 'susan')
 
-        p.unlike(w)
+        p.unlike(s)
         db.session.commit()
-        self.assertFalse(p.is_liking(w))
+        self.assertFalse(p.is_liking(s))
         self.assertEqual(p.liked.count(), 0)
-        self.assertEqual(w.likers.count(), 0)
+        self.assertEqual(s.likers.count(), 0)
 
-    def test_follow_works(self):
+    def test_follow_stories(self):
         # create four prompters
         p1 = Prompter(username='john', email='john@example.com')
         p2 = Prompter(username='susan', email='susan@example.com')
@@ -72,15 +72,11 @@ class PrompterModelTests(BaseTestCase):
 
         # create four pieces
         now = datetime.utcnow()
-        w1 = Work(genre=Genre.fiction, title="piece from john", prompter=p1,
-                  timestamp=now + timedelta(seconds=1))
-        w2 = Work(genre=Genre.nonfiction, title="piece from susan", prompter=p2,
-                  timestamp=now + timedelta(seconds=4))
-        w3 = Work(genre=Genre.poetry, title="piece from mary", prompter=p3,
-                  timestamp=now + timedelta(seconds=3))
-        w4 = Work(genre=Genre.drama, title="piece from david", prompter=p4,
-                  timestamp=now + timedelta(seconds=2))
-        db.session.add_all([w1, w2, w3, w4])
+        s1 = Story(title="piece from john", prompter=p1, timestamp=now + timedelta(seconds=1))
+        s2 = Story(title="piece from susan", prompter=p2, timestamp=now + timedelta(seconds=4))
+        s3 = Story(title="piece from mary", prompter=p3, timestamp=now + timedelta(seconds=3))
+        s4 = Story(title="piece from david", prompter=p4, timestamp=now + timedelta(seconds=2))
+        db.session.add_all([s1, s2, s3, s4])
         db.session.commit()
 
         # setup the followers
@@ -91,11 +87,11 @@ class PrompterModelTests(BaseTestCase):
         db.session.commit()
 
         # check the followed posts of each user
-        f1 = p1.followed_works().all()
-        f2 = p2.followed_works().all()
-        f3 = p3.followed_works().all()
-        f4 = p4.followed_works().all()
-        self.assertEqual(f1, [w2, w4])
-        self.assertEqual(f2, [w3])
-        self.assertEqual(f3, [w4])
+        f1 = p1.followed_stories().all()
+        f2 = p2.followed_stories().all()
+        f3 = p3.followed_stories().all()
+        f4 = p4.followed_stories().all()
+        self.assertEqual(f1, [s2, s4])
+        self.assertEqual(f2, [s3])
+        self.assertEqual(f3, [s4])
         self.assertEqual(f4, [])

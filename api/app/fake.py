@@ -3,7 +3,7 @@ import click
 from flask import Blueprint
 from faker import Faker
 from app import db
-from app.models import Genre, Prompter, Work
+from app.models import Prompter, Story
 
 fake = Blueprint('fake', __name__)
 faker = Faker()
@@ -33,25 +33,24 @@ def prompters(num):  # pragma: no cover
 
 @fake.cli.command()
 @click.argument('num', type=int)
-def works(num):  # pragma: no cover
-    """Create the given number of fake works, assigned to random prompters."""
+def stories(num):  # pragma: no cover
+    """Create the given number of fake stories, assigned to random prompters."""
     prompters = db.session.query(Prompter).all()
-    works = []
+    stories = []
     for i in range(num):
         prompter = random.choice(prompters)
-        work = Work(title=faker.paragraph(nb_sentences=1), prompter=prompter,
+        story = Story(title=faker.paragraph(nb_sentences=1), prompter=prompter,
                     timestamp=faker.date_time_this_year())
-        work.genre = random.choice(list(Genre))
-        work.generate_completion()
-        db.session.add(work)
-        works.append(work)
+        story.generate_completion()
+        db.session.add(story)
+        stories.append(story)
     
-    # create some liked works as well
+    # create some liked stories as well
     for prompter in prompters:
         num_liked = random.randint(0, 10)
         for i in range(num_liked):
-            liking = random.choice(works)
+            liking = random.choice(stories)
             prompter.like(liking)
 
     db.session.commit()
-    print(num, 'works added.')
+    print(num, 'stories added.')

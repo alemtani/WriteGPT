@@ -2,7 +2,7 @@ from app import db
 from app.auth import token_auth
 from app.decorators import paginated_response
 from app.errors import bad_request
-from app.models import Prompter, Work
+from app.models import Prompter, Story
 from flask import abort, Blueprint, jsonify, request, url_for
 
 prompters = Blueprint('prompters', __name__)
@@ -57,12 +57,12 @@ def update_prompter(id):
     db.session.commit()
     return jsonify(prompter.to_dict())
 
-@prompters.route('/prompters/<int:id>/works', methods=['GET'])
+@prompters.route('/prompters/<int:id>/stories', methods=['GET'])
 @token_auth.login_required
-@paginated_response(model_class=Work, endpoint='prompters.get_prompter_works')
-def get_prompter_works(id):
+@paginated_response(model_class=Story, endpoint='prompters.get_prompter_stories')
+def get_prompter_stories(id):
     prompter = db.session.get(Prompter, id) or abort(404)
-    return prompter.works, id
+    return prompter.stories, id
 
 @prompters.route('/prompters/<int:id>/followers', methods=['GET'])
 @token_auth.login_required
@@ -106,7 +106,7 @@ def unfollow(id, target_id):
 
 @prompters.route('/prompters/<int:id>/liked', methods=['GET'])
 @token_auth.login_required
-@paginated_response(model_class=Work, endpoint='prompters.get_liked')
+@paginated_response(model_class=Story, endpoint='prompters.get_liked')
 def get_liked(id):
     prompter = db.session.get(Prompter, id) or abort(404)
     return prompter.liked, id
@@ -117,7 +117,7 @@ def like(id, target_id):
     if token_auth.current_user().id != id:
         abort(403)
     prompter = db.session.get(Prompter, id) or abort(404)
-    target = db.session.get(Work, target_id) or abort(404)
+    target = db.session.get(Story, target_id) or abort(404)
     if prompter.is_liking(target):
         abort(409)
     prompter.like(target)
@@ -130,7 +130,7 @@ def unlike(id, target_id):
     if token_auth.current_user().id != id:
         abort(403)
     prompter = db.session.get(Prompter, id) or abort(404)
-    target = db.session.get(Work, target_id) or abort(404)
+    target = db.session.get(Story, target_id) or abort(404)
     if not prompter.is_liking(target):
         abort(409)
     prompter.unlike(target)
@@ -139,9 +139,9 @@ def unlike(id, target_id):
 
 @prompters.route('/prompters/<int:id>/feed', methods=['GET'])
 @token_auth.login_required
-@paginated_response(model_class=Work, endpoint='prompters.get_feed')
+@paginated_response(model_class=Story, endpoint='prompters.get_feed')
 def get_feed(id):
     if token_auth.current_user().id != id:
         abort(403)
     prompter = db.session.get(Prompter, id) or abort(404)
-    return prompter.followed_works(), id
+    return prompter.followed_stories(), id
