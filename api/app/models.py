@@ -153,6 +153,9 @@ class Prompter(PaginatedAPIMixin, db.Model):
         if 'password' in data:
             self.set_password(data['password'])
     
+    def ping(self):
+        self.last_seen = datetime.utcnow()
+    
     def get_token(self, expires_in=3600):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
@@ -170,6 +173,7 @@ class Prompter(PaginatedAPIMixin, db.Model):
         prompter = db.session.query(Prompter).filter_by(token=token).first()
         if prompter is None or prompter.token_expiration < datetime.utcnow():
             return None
+        prompter.ping()
         return prompter
 
 class Work(PaginatedAPIMixin, db.Model):

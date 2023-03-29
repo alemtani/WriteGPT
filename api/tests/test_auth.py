@@ -19,11 +19,19 @@ class AuthTests(BaseTestCase):
         })
         assert rv.status_code == 200
         assert rv.json['items'][0]['username'] == 'test'
+        last_seen = rv.json['items'][0]['last_seen']
 
         rv = self.client.get('/api/prompters', headers={
             'Authorization': f'Bearer {token + "x"}'
         })
         assert rv.status_code == 401
+
+        rv = self.client.get('/api/prompters', headers={
+            'Authorization': f'Bearer {token}'
+        })
+        assert rv.status_code == 200
+        assert rv.json['items'][0]['username'] == 'test'
+        assert rv.json['items'][0]['last_seen'] > last_seen
 
     def test_token_expired(self):
         rv = self.client.post('/api/tokens', auth=('test', 'foo'))
