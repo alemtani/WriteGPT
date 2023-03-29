@@ -20,7 +20,9 @@ def basic_auth_error(status):
 @token_auth.verify_token
 def verify_token(token):
     if current_app.config['DISABLE_AUTH']:
-        return db.session.get(Prompter, 1)
+        prompter = db.session.scalars(db.session.query(Prompter)).first()
+        prompter.ping()
+        return prompter
     return Prompter.check_token(token) if token else None
 
 @token_auth.error_handler

@@ -23,3 +23,6 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER')
     ADMINS = ['alex.m.tanimoto@gmail.com']
+
+    # Debugging
+    DISABLE_AUTH = os.environ.get('DISABLE_AUTH')

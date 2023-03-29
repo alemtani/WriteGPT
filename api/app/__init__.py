@@ -31,6 +31,8 @@ def create_app(config_class=Config):
     app.register_blueprint(tokens, url_prefix='/api')
     from app.works import works
     app.register_blueprint(works, url_prefix='/api')
+    from app.fake import fake
+    app.register_blueprint(fake)
 
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:
