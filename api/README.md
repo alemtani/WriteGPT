@@ -48,17 +48,20 @@ In the current `api` directory, create an `.env` file and define the following e
 
 Here are the keys you will define:
 
-- `SECRET_KEY`: I would suggest choosing a key from [RandomKeygen](https://randomkeygen.com/)
-- `OPENAI_API_KEY`: You need to get this key from the [OpenAI API](https://openai.com/blog/openai-api)
+- `SECRET_KEY`
+  - I would suggest choosing a key from [RandomKeygen](https://randomkeygen.com/)
+- `OPENAI_API_KEY`
+  - You need to get this key from the [OpenAI API](https://openai.com/blog/openai-api)
 
 #### 4b. Integration
 
 These are important for connecting to the database and frontend components of the application
 
-- `DATABASE_URL`: This should be of the [format described on SQLAlchemy](https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls)
+- `DATABASE_URL`
+  - This should be of the [format described on SQLAlchemy](https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls)
 - `CLIENT_NAME`
-  - For development you can do `http://localhost:3000`
-  - For production you will need to use the production client name
+  - For development, set to `http://localhost:3000`
+  - For production, set to the production client name
 
 #### 4c. Email
 
