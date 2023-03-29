@@ -59,7 +59,7 @@ These are important for connecting to the database and frontend components of th
 
 - `DATABASE_URL`
   - This should be of the [format described on SQLAlchemy](https://docs.sqlalchemy.org/en/20/core/engines.html#database-urls)
-- `CLIENT_NAME`
+- `BASE_CLIENT_URL`
   - For development, set to `http://localhost:3000`
   - For production, set to the production client name
 
