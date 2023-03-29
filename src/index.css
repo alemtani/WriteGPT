@@ -58,7 +58,17 @@
   color: #14c;
 }
 
-.Work a .prompter-link {
+.Work .prompter-link {
   color: #444;
   font-style: italic;
+}
+
+.Work .prompter-link:visited {
+  color: #444;
+}
+
+.More {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: right;
 }

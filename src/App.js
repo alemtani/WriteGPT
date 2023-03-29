@@ -5,6 +5,7 @@ import {
   Route,
   Navigate
 } from 'react-router-dom';
+import ApiProvider from './contexts/ApiProvider';
 import Header from './components/Header';
 import FeedPage from './pages/FeedPage';
 import ExplorePage from './pages/ExplorePage';
@@ -16,15 +17,17 @@ function App() {
   return (
     <Container fluid className="App">
       <BrowserRouter>
-        <Header />
-        <Routes>
-          <Route path="/" element={<FeedPage />} />
-          <Route path="/explore" element={<ExplorePage />} />
-          <Route path="/prompter/:id" element={<PrompterPage />} />
-          <Route path="/liked" element={<LikedPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        <ApiProvider>
+          <Header />
+          <Routes>
+            <Route path="/" element={<FeedPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/prompter/:id" element={<PrompterPage />} />
+            <Route path="/liked" element={<LikedPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </ApiProvider>
       </BrowserRouter>
     </Container>
   );

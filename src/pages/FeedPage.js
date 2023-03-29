@@ -4,7 +4,7 @@ import Works from '../components/Works';
 export default function FeedPage() {
     return (
         <Body sidebar>
-            <Works />
+            <Works content='feed' />
         </Body>
     )
 }

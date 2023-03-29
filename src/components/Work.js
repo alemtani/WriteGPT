@@ -12,13 +12,13 @@ export default function Work({ work }) {
                     <Link to={'/work/' + work.id}>
                         {work.title}
                     </Link>
-                    &nbsp;&mdash;&nbsp;
-                    <TimeAgo isoDate={work.timestamp} />
                 </p>
                 <p>
-                    <Link to={'/prompter/' + work.prompter.id}>
-                        <span className="prompter-link">{work.prompter.username}</span>
+                    <Link to={'/prompter/' + work.prompter.id} className="prompter-link">
+                        {work.prompter.username}
                     </Link>
+                    &nbsp;&mdash;&nbsp;
+                    <TimeAgo isoDate={work.timestamp} />
                 </p>
                 <p>{work.body}</p>
             </div>
