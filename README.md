@@ -39,6 +39,39 @@ Instead, it will copy all the configuration files and the transitive dependencie
 
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
+## Setup
+
+Here is an overview of the steps:
+1. [Install the necessary dependencies](#1-install-the-necessary-dependencies)
+2. [Set the environment variables](#2-set-the-environment-variables)
+3. [Start the frontend and backend](#3-start-the-frontend-and-backend)
+
+### 1. Install the necessary dependencies
+
+Run the following command in the project directory:
+
+#### `yarn install`
+
+### 2. Set the environment variables
+
+Create a `.env` file with the following environment variable:
+
+#### `REACT_APP_PROXY_TARGET`
+
+For development, set to `http://localhost:5000`.
+
+For production, set to the production server name.
+
+### 3. Start the frontend and backend
+
+To start the frontend, run the following:
+
+#### `yarn start`
+
+To start the backend (in a **separate** terminal), run the following:
+
+#### `yarn start-api`
+
 ## Learn More
 
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
@@ -68,3 +101,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Resources
+
+For information on building the frontend integrated with a Flask API, check out the [React Mega-Tutorial](https://blog.miguelgrinberg.com/post/introducing-the-react-mega-tutorial).
