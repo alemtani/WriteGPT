@@ -62,7 +62,7 @@ def update_prompter(id):
 @paginated_response(model_class=Story, endpoint='prompters.get_prompter_stories')
 def get_prompter_stories(id):
     prompter = db.session.get(Prompter, id) or abort(404)
-    return prompter.stories, id
+    return prompter.stories.order_by(Story.timestamp.desc()), id
 
 @prompters.route('/prompters/<int:id>/followers', methods=['GET'])
 @token_auth.login_required
@@ -109,7 +109,7 @@ def unfollow(id, target_id):
 @paginated_response(model_class=Story, endpoint='prompters.get_liked')
 def get_liked(id):
     prompter = db.session.get(Prompter, id) or abort(404)
-    return prompter.liked, id
+    return prompter.liked.order_by(Story.timestamp.desc()), id
 
 @prompters.route('/prompters/<int:id>/liked/<int:target_id>', methods=['POST'])
 @token_auth.login_required

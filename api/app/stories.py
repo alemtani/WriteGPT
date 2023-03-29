@@ -11,7 +11,7 @@ stories = Blueprint('stories', __name__)
 @token_auth.login_required
 @paginated_response(model_class=Story, endpoint='stories.get_stories')
 def get_stories():
-    return db.session.query(Story), None
+    return db.session.query(Story).order_by(Story.timestamp.desc()), None
 
 @stories.route('/stories', methods=['POST'])
 @token_auth.login_required
