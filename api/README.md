@@ -84,6 +84,14 @@ Here is an environment variable you will need to set when debugging from time-to
 ## Development
 
 To run Flask on debugging mode, make sure to set `FLASK_DEBUG=1`.
+
+You should probably also run these commands to generate fake data in the database:
+
+```
+flask upgrade
+flask fake prompters 10
+flask fake stories 20
+```
   
 ## Testing
 
