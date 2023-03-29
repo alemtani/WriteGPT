@@ -74,6 +74,13 @@ Here are the variables you need to define below. Follow instructions from the [S
 - `MAIL_PASSWORD`
 - `MAIL_DEFAULT_SENDER`
 
+#### 4d. Debugging
+
+Here is an environment variable you will need to set when debugging from time-to-time:
+
+- `DISABLE_AUTH`
+  - In some cases (but **not** all), when you are debugging, you will set this to `True` (in the `.env` file, set to `1`).
+
 ## Resources
 
 For more information on the basics of Flask and an introduction to building Flask APIs, please check out the [Flask Mega-Tutorial](https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world).
