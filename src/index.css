@@ -67,6 +67,12 @@
   color: #444;
 }
 
+.prompter-link-header {
+  color: #14c;
+  text-decoration: none;
+  font-style: italic;
+}
+
 .More {
   margin-top: 10px;
   margin-bottom: 10px;

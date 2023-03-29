@@ -9,8 +9,9 @@ import ApiProvider from './contexts/ApiProvider';
 import Header from './components/Header';
 import FeedPage from './pages/FeedPage';
 import ExplorePage from './pages/ExplorePage';
-import PrompterPage from './pages/PrompterPage';
 import LikedPage from './pages/LikedPage';
+import PrompterPage from './pages/PrompterPage';
+import StoryPage from './pages/StoryPage';
 import LoginPage from './pages/LoginPage';
 
 function App() {
@@ -22,8 +23,9 @@ function App() {
           <Routes>
             <Route path="/" element={<FeedPage />} />
             <Route path="/explore" element={<ExplorePage />} />
-            <Route path="/prompter/:id" element={<PrompterPage />} />
             <Route path="/liked" element={<LikedPage />} />
+            <Route path="/prompter/:id" element={<PrompterPage />} />
+            <Route path="/story/:id" element={<StoryPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
