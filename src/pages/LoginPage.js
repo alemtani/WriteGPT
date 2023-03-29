@@ -1,20 +1,26 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Body from '../components/Body';
 import InputField from '../components/InputField';
-import { Link } from 'react-router-dom';
+import { useUser } from '../contexts/UserProvider';
+import { useFlash } from '../contexts/FlashProvider';
 
 export default function LoginPage() {
     const [formErrors, setFormErrors] = useState({});
     const usernameField = useRef();
     const passwordField = useRef();
+    const { login } = useUser();
+    const flash = useFlash();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         usernameField.current.focus();
     }, []);
 
-    const onSubmit = (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
         const username = usernameField.current.value;
         const password = passwordField.current.value;
@@ -29,6 +35,17 @@ export default function LoginPage() {
         setFormErrors(errors);
         if (Object.keys(errors).length > 0) {
             return;
+        }
+
+        const result = await login(username, password);
+        if (result === 'fail') {
+            flash('Invalid username or password', 'danger');
+        } else if (result === 'ok') {
+            let next = '/';
+            if (location.state && location.state.next) {
+                next = location.state.next;
+            }
+            navigate(next);
         }
     };
 

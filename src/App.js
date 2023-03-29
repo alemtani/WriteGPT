@@ -7,6 +7,7 @@ import {
 } from 'react-router-dom';
 import ApiProvider from './contexts/ApiProvider';
 import FlashProvider from './contexts/FlashProvider';
+import UserProvider from './contexts/UserProvider';
 import Header from './components/Header';
 import FeedPage from './pages/FeedPage';
 import ExplorePage from './pages/ExplorePage';
@@ -15,6 +16,8 @@ import PrompterPage from './pages/PrompterPage';
 import StoryPage from './pages/StoryPage';
 import LoginPage from './pages/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
+import PublicRoute from './components/PublicRoute';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
   return (
@@ -22,17 +25,29 @@ function App() {
       <BrowserRouter>
         <FlashProvider>
           <ApiProvider>
-            <Header />
-            <Routes>
-              <Route path="/" element={<FeedPage />} />
-              <Route path="/explore" element={<ExplorePage />} />
-              <Route path="/liked" element={<LikedPage />} />
-              <Route path="/prompter/:id" element={<PrompterPage />} />
-              <Route path="/story/:id" element={<StoryPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegistrationPage />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
+            <UserProvider>
+              <Header />
+              <Routes>
+                <Route path="/login" element={
+                  <PublicRoute><LoginPage /></PublicRoute>
+                } />
+                <Route path="/register" element={
+                  <PublicRoute><RegistrationPage /></PublicRoute>
+                } />
+                <Route path="*" element={
+                  <PrivateRoute>
+                    <Routes>
+                      <Route path="/" element={<FeedPage />} />
+                      <Route path="/explore" element={<ExplorePage />} />
+                      <Route path="/liked" element={<LikedPage />} />
+                      <Route path="/prompter/:id" element={<PrompterPage />} />
+                      <Route path="/story/:id" element={<StoryPage />} />
+                      <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                  </PrivateRoute>
+                } />
+              </Routes>
+            </UserProvider>
           </ApiProvider>
         </FlashProvider>
       </BrowserRouter>

@@ -1,25 +1,37 @@
 from app import db
 from flask import Blueprint, jsonify
-from werkzeug.http import HTTP_STATUS_CODES
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from werkzeug.exceptions import HTTPException, InternalServerError
 
 errors = Blueprint('errors', __name__)
 
-def error_response(status_code, message=None):
-    payload = {'error': HTTP_STATUS_CODES.get(status_code, 'Unknown error')}
-    if message:
-        payload['message'] = message
-    response = jsonify(payload)
-    response.status_code = status_code
-    return response
-
 def bad_request(message):
-    return error_response(400, message)
+    return {
+        'code': 400,
+        'message': message
+    }, 400
 
-@errors.app_errorhandler(404)
-def not_found_error(error):
-    return error_response(404)
+@errors.app_errorhandler(HTTPException)
+def http_error(error):
+    return {
+        'code': error.code,
+        'message': error.name,
+        'description': error.description,
+    }, error.code
 
-@errors.app_errorhandler(500)
-def internal_error(error):
-    db.session.rollback()
-    return error_response(500)
+@errors.app_errorhandler(IntegrityError)
+def sqlalchemy_integrity_error(error):  # pragma: no cover
+    return {
+        'code': 400,
+        'message': 'Database integrity error',
+        'description': str(error.orig),
+    }, 400
+
+
+@errors.app_errorhandler(SQLAlchemyError)
+def sqlalchemy_error(error):  # pragma: no cover
+    return {
+        'code': InternalServerError.code,
+        'message': InternalServerError().name,
+        'description': InternalServerError.description,
+    }, 500

@@ -10,9 +10,10 @@ tokens = Blueprint('tokens', __name__)
 @tokens.route('/tokens', methods=['POST'])
 @basic_auth.login_required
 def get_token():
+    id = basic_auth.current_user().id
     token = basic_auth.current_user().get_token()
     db.session.commit()
-    return jsonify({'token': token})
+    return jsonify({'token': token, 'currentUser': id})
 
 @tokens.route('/tokens', methods=['DELETE'])
 @token_auth.login_required

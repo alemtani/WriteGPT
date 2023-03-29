@@ -4,6 +4,11 @@ export default class ApiClient {
     }
 
     async request(options) {
+        let response = await this.requestInternal(options);
+        return response;
+    }
+
+    async requestInternal(options) {
         let query = new URLSearchParams(options.query || {}).toString();
         if (query !== '') {
             query = '?' + query;
@@ -15,6 +20,7 @@ export default class ApiClient {
                 method: options.method,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token'),
                     ...options.headers,
                 },
                 body: options.body ? JSON.stringify(options.body) : null,
@@ -55,4 +61,28 @@ export default class ApiClient {
     async delete(url, options) {
         return this.request({method: 'DELETE', url, ...options});
     }
+
+    async login(username, password) {
+        const response = await this.post('/tokens', null, {
+          headers: {
+            Authorization:  'Basic ' + window.btoa(username + ":" + password)
+          }
+        });
+        if (!response.ok) {
+            return response.status === 401 ? 'fail' : 'error';
+        }
+        localStorage.setItem('token', response.body.token);
+        localStorage.setItem('currentUser', response.body.currentUser);
+        return 'ok';
+    }
+
+    async logout() {
+        await this.delete('/tokens');
+        localStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+    }
+
+    isAuthenticated() {
+        return localStorage.getItem('token') !== null;
+    }    
 }
