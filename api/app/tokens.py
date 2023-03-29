@@ -25,7 +25,7 @@ def revoke_token():
 def reset():
     data = request.get_json() or {}
     if 'email' not in data:
-        return bad_request('must include email field')
+        return bad_request('Must include email field')
     prompter = db.session.query(Prompter).filter_by(email=data['email']).first()
     if not prompter:
         abort(404)
@@ -43,7 +43,7 @@ def reset():
 def password_reset():
     data = request.get_json() or {}
     if 'token' not in data or 'new_password' not in data:
-        return bad_request('must include token and new_password fields')
+        return bad_request('Must include token and new password fields')
     prompter = Prompter.verify_reset_password_token(data['token'])
     if not prompter:
         abort(404)

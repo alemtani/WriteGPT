@@ -19,7 +19,7 @@ def create_story():
     prompter = token_auth.current_user()
     data = request.get_json() or {}
     if 'title' not in data:
-        return bad_request('must include title field')
+        return bad_request('Must include title field')
     story = Story(prompter=prompter)
     story.from_dict(data)
     db.session.add(story)
@@ -44,7 +44,7 @@ def update_story(id):
     data = request.get_json() or {}
     if 'title' in data and data['title'] != story.title and \
             db.session.query(Story).filter_by(title=data['title']).first():
-        return bad_request('please use a different title')
+        return bad_request('Please use a different title')
     story.from_dict(data)
     db.session.commit()
     return jsonify(story.to_dict())

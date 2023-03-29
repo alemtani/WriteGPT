@@ -11,11 +11,11 @@ prompters = Blueprint('prompters', __name__)
 def create_prompter():
     data = request.get_json() or {}
     if 'username' not in data or 'email' not in data or 'password' not in data:
-        return bad_request('must include username, email and password fields')
+        return bad_request('Must include username, email, and password fields')
     if db.session.query(Prompter).filter_by(username=data['username']).first():
-        return bad_request('please use a different username')
+        return bad_request('Please use a different username')
     if db.session.query(Prompter).filter_by(email=data['email']).first():
-        return bad_request('please use a different email address')
+        return bad_request('Please use a different email address')
     prompter = Prompter()
     prompter.from_dict(data)
     db.session.add(prompter)
@@ -46,13 +46,13 @@ def update_prompter(id):
     data = request.get_json() or {}
     if 'username' in data and data['username'] != prompter.username and \
             db.session.query(Prompter).filter_by(username=data['username']).first():
-        return bad_request('please use a different username')
+        return bad_request('Please use a different username')
     if 'email' in data and data['email'] != prompter.email and \
             db.session.query(Prompter).filter_by(email=data['email']).first():
-        return bad_request('please use a different email address')
+        return bad_request('Please use a different email address')
     if 'password' in data and ('old_password' not in data or 
                                not prompter.check_password(data['old_password'])):
-        return bad_request('must include old_password to change password')
+        return bad_request('Must include old password to change password')
     prompter.from_dict(data)
     db.session.commit()
     return jsonify(prompter.to_dict())
