@@ -75,7 +75,7 @@ npm start
 To start the backend (in a **separate** terminal), run the following:
 
 ```
-npm start-api
+npm run start-api
 ```
 
 ## Learn More
