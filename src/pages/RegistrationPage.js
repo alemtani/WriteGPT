@@ -30,38 +30,36 @@ export default function RegistrationPage() {
 
         const errors = {};
         if (!username) {
-            errors.username = 'Username must not be empty.'
+            errors.username = 'Username must not be empty.';
         }
         if (!email) {
-            errors.email = 'Email address must not be empty.'
+            errors.email = 'Email address must not be empty.';
         }
         if (!password) {
-            errors.password = 'Password must not be empty.'
+            errors.password = 'Password must not be empty.';
         }
         if (!password2) {
-            errors.password2 = 'Password again must not be empty.'
+            errors.password2 = 'Password again must not be empty.';
+        }
+        if (password !== password2) {
+            errors.password2 = "Passwords don't match.";
         }
         setFormErrors(errors);
         if (Object.keys(errors).length > 0) {
             return;
         }
 
-        if (password !== password2) {
-            setFormErrors({password2: "Passwords don't match"});
+        const data = await api.post('/prompters', {
+            username,
+            email,
+            password
+        });
+        setFormErrors({});
+        if (!data.ok) {
+            flash(data.body.message, 'danger');
         } else {
-            console.log('Handle from here!');
-            const data = await api.post('/prompters', {
-                username,
-                email,
-                password
-            });
-            setFormErrors({});
-            if (!data.ok) {
-                flash(data.body.message, 'danger');
-            } else {
-                flash('You have successfully registered!', 'success');
-                navigate('/login');
-            }
+            flash('You have successfully registered!', 'success');
+            navigate('/login');
         }
     };
 

@@ -18,6 +18,7 @@ import LoginPage from './pages/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
 import EditPrompterPage from './pages/EditPrompterPage';
 import EditStoryPage from './pages/EditStoryPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import PublicRoute from './components/PublicRoute';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -46,6 +47,7 @@ function App() {
                       <Route path="/prompter/:id" element={<PrompterPage />} />
                       <Route path="/story/:id/edit" element={<EditStoryPage />} />
                       <Route path="/story/:id" element={<StoryPage />} />
+                      <Route path="/password" element={<ChangePasswordPage />} />
                       <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
                   </PrivateRoute>

@@ -50,9 +50,11 @@ def update_prompter(id):
     if 'email' in data and data['email'] != prompter.email and \
             db.session.query(Prompter).filter_by(email=data['email']).first():
         return bad_request('Please use a different email address')
-    if 'password' in data and ('old_password' not in data or 
-                               not prompter.check_password(data['old_password'])):
-        return bad_request('Must include old password to change password')
+    if 'password' in data:
+        if 'old_password' not in data:
+            return bad_request('Must include old password to change password')
+        if not prompter.check_password(data['old_password']):
+            return bad_request('Old password is incorrect')
     prompter.from_dict(data)
     db.session.commit()
     return jsonify(prompter.to_dict())
