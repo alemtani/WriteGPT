@@ -4,8 +4,9 @@ import { useApi } from '../contexts/ApiProvider';
 import { useUser } from '../contexts/UserProvider';
 import Story from './Story';
 import More from './More';
+import Write from './Write';
 
-export default function Stories({ content }) {
+export default function Stories({ content, write }) {
   const [stories, setStories] = useState();
   const [pagination, setPagination] = useState();
   const api = useApi();
@@ -52,6 +53,7 @@ export default function Stories({ content }) {
 
   return (
     <>
+      {write && <Write />}
       {stories === undefined ?
         <Spinner animation="border" />
       :

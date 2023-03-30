@@ -3,7 +3,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Body from '../components/Body';
 import InputField from '../components/InputField';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useApi } from '../contexts/ApiProvider';
 import { useFlash } from '../contexts/FlashProvider';
 
@@ -83,6 +83,8 @@ export default function RegistrationPage() {
                     error={formErrors.password2} fieldRef={password2Field} />
                 <Button variant="primary" type="submit">Register</Button>
             </Form>
+            <hr />
+            <p>Already have an account? <Link to="/login">Login here</Link>!</p>
         </Body>
     );
 }

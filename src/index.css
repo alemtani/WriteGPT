@@ -91,3 +91,30 @@
 .Sidebar .nav-item .active, .dropdown-item.active {
   background-color: #def;
 }
+
+.story-summary {
+  text-overflow: ellipsis;
+  max-height: 3em;
+  line-height: 1.5em;
+  overflow: hidden;
+}
+
+.Write {
+  margin-bottom: 10px;
+  padding: 30px 0px 40px 0px;
+  border-bottom: 1px solid #eee;
+}
+
+.Write form {
+  width: 100%;
+}
+
+.story-flash {
+  color: #444;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.story-flash:hover {
+  color: #f8f8f8;
+}

@@ -102,7 +102,10 @@ export default function PrompterPage() {
                                     }
                                 </div>
                             </Stack>
-                            <Stories content={id} />
+                            <Stories 
+                                write={isFollower === null}
+                                content={id} 
+                            />
                         </>
                     }
                 </>

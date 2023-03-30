@@ -27,7 +27,6 @@ export default function UserProvider({ children }) {
             const currentUser = localStorage.getItem('currentUser');
             const response = await api.get('/prompters/' + currentUser);
             setUser(response.ok ? response.body : null);
-            return response.ok;
         }
         return result;
     };
