@@ -16,6 +16,7 @@ import PrompterPage from './pages/PrompterPage';
 import StoryPage from './pages/StoryPage';
 import LoginPage from './pages/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
+import EditPrompterPage from './pages/EditPrompterPage';
 import PublicRoute from './components/PublicRoute';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -42,6 +43,7 @@ function App() {
                       <Route path="/liked" element={<LikedPage />} />
                       <Route path="/prompter/:id" element={<PrompterPage />} />
                       <Route path="/story/:id" element={<StoryPage />} />
+                      <Route path="/edit" element={<EditPrompterPage />} />
                       <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
                   </PrivateRoute>

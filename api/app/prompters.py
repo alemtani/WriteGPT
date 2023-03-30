@@ -78,6 +78,15 @@ def get_following(id):
     prompter = db.session.get(Prompter, id) or abort(404)
     return prompter.followed, id
 
+@prompters.route('/prompters/<int:id>/following/<target_id>', methods=['GET'])
+@token_auth.login_required
+def get_is_following(id, target_id):
+    if token_auth.current_user().id != id:
+        abort(403)
+    prompter = db.session.get(Prompter, id) or abort(404)
+    target = db.session.get(Prompter, target_id) or abort(404)
+    return jsonify({'isFollowing': prompter.is_following(target)})
+
 @prompters.route('/prompters/<int:id>/following/<target_id>', methods=['POST'])
 @token_auth.login_required
 def follow(id, target_id):
@@ -104,14 +113,23 @@ def unfollow(id, target_id):
     db.session.commit()
     return {}, 204
 
-@prompters.route('/prompters/<int:id>/liked', methods=['GET'])
+@prompters.route('/prompters/<int:id>/liking', methods=['GET'])
 @token_auth.login_required
-@paginated_response(model_class=Story, endpoint='prompters.get_liked')
-def get_liked(id):
+@paginated_response(model_class=Story, endpoint='prompters.get_liking')
+def get_liking(id):
     prompter = db.session.get(Prompter, id) or abort(404)
     return prompter.liked.order_by(Story.timestamp.desc()), id
 
-@prompters.route('/prompters/<int:id>/liked/<int:target_id>', methods=['POST'])
+@prompters.route('/prompters/<int:id>/liking/<int:target_id>', methods=['GET'])
+@token_auth.login_required
+def get_is_liking(id, target_id):
+    if token_auth.current_user().id != id:
+        abort(403)
+    prompter = db.session.get(Prompter, id) or abort(404)
+    target = db.session.get(Story, target_id) or abort(404)
+    return jsonify({'isLiking': prompter.is_liking(target)})
+
+@prompters.route('/prompters/<int:id>/liking/<int:target_id>', methods=['POST'])
 @token_auth.login_required
 def like(id, target_id):
     if token_auth.current_user().id != id:
@@ -124,7 +142,7 @@ def like(id, target_id):
     db.session.commit()
     return {}, 204
 
-@prompters.route('/prompters/<int:id>/liked/<int:target_id>', methods=['DELETE'])
+@prompters.route('/prompters/<int:id>/liking/<int:target_id>', methods=['DELETE'])
 @token_auth.login_required
 def unlike(id, target_id):
     if token_auth.current_user().id != id:

@@ -203,6 +203,12 @@ class PrompterTests(BaseTestCase):
         assert rv.status_code == 201
         id = rv.json['id']
 
+        rv = self.client.get(f'/api/prompters/1/following/{id}', headers={
+            'Authorization': f'Bearer {self.token}'
+        })
+        assert rv.status_code == 200
+        assert not rv.json['isFollowing']
+
         rv = self.client.post(f'/api/prompters/1/following/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
@@ -212,6 +218,12 @@ class PrompterTests(BaseTestCase):
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 409
+
+        rv = self.client.get(f'/api/prompters/1/following/{id}', headers={
+            'Authorization': f'Bearer {self.token}'
+        })
+        assert rv.status_code == 200
+        assert rv.json['isFollowing']
 
         rv = self.client.get('/api/prompters/1/following', headers={
             'Authorization': f'Bearer {self.token}'
@@ -250,6 +262,12 @@ class PrompterTests(BaseTestCase):
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 409
+
+        rv = self.client.get(f'/api/prompters/1/following/{id}', headers={
+            'Authorization': f'Bearer {self.token}'
+        })
+        assert rv.status_code == 200
+        assert not rv.json['isFollowing']
 
         rv = self.client.get('/api/prompters/1/following', headers={
             'Authorization': f'Bearer {self.token}'
@@ -299,7 +317,7 @@ class PrompterTests(BaseTestCase):
         assert rv.json['items'] == []
     
     def test_like_unlike(self):
-        rv = self.client.get('/api/prompters/1/liked', headers={
+        rv = self.client.get('/api/prompters/1/liking', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200
@@ -314,24 +332,36 @@ class PrompterTests(BaseTestCase):
         assert rv.status_code == 201
         id = rv.json['id']
 
-        rv = self.client.get('/api/prompters/1/liked', headers={
+        rv = self.client.get('/api/prompters/1/liking', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200
         assert rv.json['_meta']['total_items'] == 0
         assert rv.json['items'] == []
 
-        rv = self.client.post(f'/api/prompters/1/liked/{id}', headers={
+        rv = self.client.get(f'/api/prompters/1/liking/{id}', headers={
+            'Authorization': f'Bearer {self.token}'
+        })
+        assert rv.status_code == 200
+        assert not rv.json['isLiking']
+
+        rv = self.client.post(f'/api/prompters/1/liking/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 204
 
-        rv = self.client.post(f'/api/prompters/1/liked/{id}', headers={
+        rv = self.client.post(f'/api/prompters/1/liking/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 409
 
-        rv = self.client.get('/api/prompters/1/liked', headers={
+        rv = self.client.get(f'/api/prompters/1/liking/{id}', headers={
+            'Authorization': f'Bearer {self.token}'
+        })
+        assert rv.status_code == 200
+        assert rv.json['isLiking']
+
+        rv = self.client.get('/api/prompters/1/liking', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200
@@ -345,17 +375,23 @@ class PrompterTests(BaseTestCase):
         assert rv.json['_meta']['total_items'] == 1
         assert rv.json['items'][0]['username'] == 'test'
 
-        rv = self.client.delete(f'/api/prompters/1/liked/{id}', headers={
+        rv = self.client.delete(f'/api/prompters/1/liking/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 204
 
-        rv = self.client.delete(f'/api/prompters/1/liked/{id}', headers={
+        rv = self.client.delete(f'/api/prompters/1/liking/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 409
 
-        rv = self.client.get('/api/prompters/1/liked', headers={
+        rv = self.client.get(f'/api/prompters/1/liking/{id}', headers={
+            'Authorization': f'Bearer {self.token}'
+        })
+        assert rv.status_code == 200
+        assert not rv.json['isLiking']
+
+        rv = self.client.get('/api/prompters/1/liking', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200
@@ -385,24 +421,24 @@ class PrompterTests(BaseTestCase):
         })
         assert rv.status_code == 201
 
-        rv = self.client.post(f'/api/prompters/{id}/liked/1', headers={
+        rv = self.client.post(f'/api/prompters/{id}/liking/1', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 403
 
-        rv = self.client.get(f'/api/prompters/{id}/liked', headers={
+        rv = self.client.get(f'/api/prompters/{id}/liking', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200
         assert rv.json['_meta']['total_items'] == 0
         assert rv.json['items'] == []
 
-        rv = self.client.delete(f'/api/prompters/{id}/liked/1', headers={
+        rv = self.client.delete(f'/api/prompters/{id}/liking/1', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 403
 
-        rv = self.client.get(f'/api/prompters/{id}/liked', headers={
+        rv = self.client.get(f'/api/prompters/{id}/liking', headers={
             'Authorization': f'Bearer {self.token}'
         })
         assert rv.status_code == 200

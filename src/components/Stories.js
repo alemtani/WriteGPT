@@ -21,7 +21,7 @@ export default function Stories({ content }) {
       url = '/stories';
       break;
     case 'liked':
-      url = `/prompters/${user.id}/liked`;
+      url = `/prompters/${user.id}/liking`;
       break;
     default:
       url = `/prompters/${content}/stories`;

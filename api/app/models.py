@@ -130,7 +130,7 @@ class Prompter(PaginatedAPIMixin, db.Model):
                 'stories': url_for('prompters.get_prompter_stories', id=self.id),
                 'followers': url_for('prompters.get_followers', id=self.id),
                 'following': url_for('prompters.get_following', id=self.id),
-                'liked': url_for('prompters.get_liked', id=self.id),
+                'liking': url_for('prompters.get_liking', id=self.id),
                 'feed': url_for('prompters.get_feed', id=self.id),
                 'avatar': self.avatar(128)
             }

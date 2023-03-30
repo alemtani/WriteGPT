@@ -45,6 +45,7 @@ export default function LoginPage() {
             if (location.state && location.state.next) {
                 next = location.state.next;
             }
+            flash('You have successfully logged in!', 'success');
             navigate(next);
         }
     };

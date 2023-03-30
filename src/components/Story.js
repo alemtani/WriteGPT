@@ -20,7 +20,7 @@ export default function Story({ story }) {
                     &nbsp;&mdash;&nbsp;
                     <TimeAgo isoDate={story.timestamp} />
                 </p>
-                <p>{story.body}</p>
+                <p>{story.body.substring(0, 300)}...</p>
             </div>
         </Stack>
     )
