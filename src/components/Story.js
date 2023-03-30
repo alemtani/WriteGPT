@@ -1,9 +1,10 @@
+import { memo } from 'react';
 import Stack from 'react-bootstrap/Stack';
 import Image from 'react-bootstrap/Image';
 import { Link } from 'react-router-dom';
 import TimeAgo from './TimeAgo';
 
-export default function Story({ story }) {
+export default memo(function Story({ story }) {
     return (
         <Stack direction="horizontal" gap={3} className="Story">
             <Image src={story.prompter._links.avatar + '&s=48'} alt={story.prompter.username} roundedCircle />
@@ -24,4 +25,4 @@ export default function Story({ story }) {
             </div>
         </Stack>
     )
-}
+});

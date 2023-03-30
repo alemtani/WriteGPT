@@ -36,8 +36,6 @@ export default function Write() {
         flash('Submitted! Please wait for ChatGPT to genereate your story.', 'info');
         const response = await api.post('/stories', {title});
         if (response.ok) {
-            titleField.current.value = '';
-            setFormErrors({});
             flash(
                 <>
                     ChatGPT has responded to your prompt: <Link to={'/story/' + response.body.id} className="story-flash">{title}</Link>
