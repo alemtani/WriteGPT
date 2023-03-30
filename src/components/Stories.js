@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Spinner from 'react-bootstrap/Spinner';
 import { useApi } from '../contexts/ApiProvider';
+import { useUser } from '../contexts/UserProvider';
 import Story from './Story';
 import More from './More';
 
@@ -8,18 +9,19 @@ export default function Stories({ content }) {
   const [stories, setStories] = useState();
   const [pagination, setPagination] = useState();
   const api = useApi();
+  const { user } = useUser();
 
   let url;
   switch (content) {
     case 'feed':
     case 'undefined':
-      url = '/prompters/1/feed';
+      url = `/prompters/${user.id}/feed`;
       break;
     case 'explore':
       url = '/stories';
       break;
     case 'liked':
-      url = '/prompters/1/liked';
+      url = `/prompters/${user.id}/liked`;
       break;
     default:
       url = `/prompters/${content}/stories`;

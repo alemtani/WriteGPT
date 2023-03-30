@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useApi } from './ApiProvider';
+import { useFlash } from '../contexts/FlashProvider';
 
 const UserContext = createContext();
 
 export default function UserProvider({ children }) {
     const [user, setUser] = useState();
     const api = useApi();
+    const flash = useFlash();
 
     useEffect(() => {
         (async () => {
@@ -32,6 +34,7 @@ export default function UserProvider({ children }) {
 
     const logout = async () => {
         await api.logout();
+        flash('You have successfully logged out!', 'success');
         setUser(null);
     }
 

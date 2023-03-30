@@ -2,13 +2,8 @@ export default class ApiClient {
     constructor() {
         this.baseUrl = '/api';
     }
-
+    
     async request(options) {
-        let response = await this.requestInternal(options);
-        return response;
-    }
-
-    async requestInternal(options) {
         let query = new URLSearchParams(options.query || {}).toString();
         if (query !== '') {
             query = '?' + query;
