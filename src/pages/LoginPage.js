@@ -27,10 +27,10 @@ export default function LoginPage() {
 
         const errors = {};
         if (!username) {
-            errors.username = 'Username must not be empty.'
+            errors.username = 'Username must not be empty.';
         }
         if (!password) {
-            errors.password = 'Password must not be empty.'
+            errors.password = 'Password must not be empty.';
         }
         setFormErrors(errors);
         if (Object.keys(errors).length > 0) {
@@ -63,6 +63,7 @@ export default function LoginPage() {
                 <Button variant="primary" type="submit">Login</Button>
             </Form>
             <hr />
+            <p>Forgot your password? You can <Link to="/reset-request">reset it</Link>.</p>
             <p>Don&apos;t have an account? <Link to="/register">Register here</Link>!</p>
         </Body>
     );

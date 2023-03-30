@@ -19,6 +19,8 @@ import RegistrationPage from './pages/RegistrationPage';
 import EditPrompterPage from './pages/EditPrompterPage';
 import EditStoryPage from './pages/EditStoryPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
+import ResetRequestPage from './pages/ResetRequestPage';
+import ResetPage from './pages/ResetPage';
 import PublicRoute from './components/PublicRoute';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -36,6 +38,12 @@ function App() {
                 } />
                 <Route path="/register" element={
                   <PublicRoute><RegistrationPage /></PublicRoute>
+                } />
+                <Route path="/reset-request" element={
+                  <PublicRoute><ResetRequestPage /></PublicRoute>
+                } />
+                <Route path="/reset" element={
+                  <PublicRoute><ResetPage /></PublicRoute>
                 } />
                 <Route path="*" element={
                   <PrivateRoute>

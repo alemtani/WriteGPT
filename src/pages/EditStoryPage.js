@@ -37,6 +37,8 @@ export default function EditStoryPage() {
         flash('Submitted! Please wait for ChatGPT to rewrite your story.', 'info');
         const response = await api.put(`/stories/${id}`, {title});
         if (response.ok) {
+            titleField.current.value = '';
+            setFormErrors({});
             flash(
                 <>
                     ChatGPT has responded to your <i>new</i> prompt: <Link to={'/story/' + response.body.id} className="story-flash">{title}</Link>
