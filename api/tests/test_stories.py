@@ -19,6 +19,13 @@ class StoryTests(BaseTestCase):
         assert rv.json['prompter']['username'] == 'test'
         id = rv.json['id']
 
+        rv = self.client.post('/api/stories', json={
+            'title': 'This is a test story',
+        }, headers={
+            'Authorization': f'Bearer {self.token}'
+        })
+        assert rv.status_code == 400
+
         rv = self.client.get(f'/api/stories/{id}', headers={
             'Authorization': f'Bearer {self.token}'
         })

@@ -20,6 +20,8 @@ def create_story():
     data = request.get_json() or {}
     if 'title' not in data:
         return bad_request('Must include title field')
+    if db.session.query(Story).filter_by(title=data['title']).first():
+        return bad_request('Please use a different prompt')
     story = Story(prompter=prompter)
     story.from_dict(data)
     db.session.add(story)
