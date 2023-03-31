@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useApi } from './ApiProvider';
 import { useFlash } from '../contexts/FlashProvider';
 
@@ -21,7 +21,7 @@ export default function UserProvider({ children }) {
         })();
     }, [api]);
 
-    const login = async (username, password) => {
+    const login = useCallback(async (username, password) => {
         const result = await api.login(username, password);
         if (result === 'ok') {
             const currentUser = localStorage.getItem('currentUser');
@@ -29,13 +29,13 @@ export default function UserProvider({ children }) {
             setUser(response.ok ? response.body : null);
         }
         return result;
-    };
+    }, [api]);
 
-    const logout = async () => {
+    const logout = useCallback(async () => {
         await api.logout();
         flash('You have successfully logged out!', 'success');
         setUser(null);
-    }
+    }, [api, flash]);
 
     return (
         <UserContext.Provider value={{ user, setUser, login, logout }}>

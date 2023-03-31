@@ -1,9 +1,18 @@
 export default class ApiClient {
-    constructor() {
+    constructor(onError) {
+        this.onError = onError;
         this.baseUrl = '/api';
     }
-    
+
     async request(options) {
+        let response = await this.requestInternal(options);
+        if (response.status >= 500 && this.onError) {
+            this.onError(response);
+        }
+        return response;
+    }
+    
+    async requestInternal(options) {
         let query = new URLSearchParams(options.query || {}).toString();
         if (query !== '') {
             query = '?' + query;
